@@ -6,32 +6,27 @@
   <title>Détail de l'activité</title>
   <style>
     body {
-      background: #fff0f5;
+      background-color: #fff0f5;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       margin: 0;
-      padding: 0;
     }
 
     header {
       background-color: #ff8fa3;
       padding: 1em;
-      text-align: center;
       color: white;
-    }
-
-    h1 {
-      margin: 0;
-      font-size: 1.6em;
+      text-align: center;
     }
 
     .back-button {
-      display: inline-block;
-      margin-top: 0.5em;
       background-color: #ff4d6d;
       padding: 0.5em 1em;
       color: white;
       text-decoration: none;
       border-radius: 12px;
+      font-weight: bold;
+      display: inline-block;
+      margin-top: 0.5em;
     }
 
     main {
@@ -40,7 +35,7 @@
       background: white;
       padding: 2em;
       border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
 
     img {
@@ -56,13 +51,11 @@
     <a href="index.html" class="back-button">⬅ Retour</a>
   </header>
 
-  <main id="detail-container">
-    <!-- Détails de l'activité injectés dynamiquement -->
-  </main>
+  <main id="detail-container"></main>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCZ7zsXf4yWALo7byJMCVNo_ySszFObeeY",
@@ -79,20 +72,22 @@
 
     const params = new URLSearchParams(window.location.search);
     const id = params.get("id");
+
     const container = document.getElementById("detail-container");
 
     async function loadActivity() {
       const docRef = doc(db, "activities", id);
       const docSnap = await getDoc(docRef);
+
       if (docSnap.exists()) {
         const data = docSnap.data();
         container.innerHTML = `
-          ${data.photo ? `<img src="${data.photo}" alt="Photo">` : ""}
+          ${data.photoURL ? `<img src="${data.photoURL}" alt="Photo activité" />` : ""}
           <h2>${data.title}</h2>
-          <p><strong>Date :</strong> ${data.date}</p>
-          <p><strong>Lieu :</strong> ${data.location}</p>
-          <p><strong>Description :</strong> ${data.description}</p>
-          <p><strong>Tags :</strong> ${data.tags}</p>
+          <p><strong>Date :</strong> ${data.date || "Non précisée"}</p>
+          <p><strong>Lieu :</strong> ${data.location || "Non précisé"}</p>
+          <p>${data.description || ""}</p>
+          <p><strong>Tags :</strong> ${data.tags || "Aucun"}</p>
         `;
       } else {
         container.innerHTML = "<p>Activité introuvable.</p>";

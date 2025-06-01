@@ -8,7 +8,6 @@
     body {
       background: linear-gradient(to bottom right, #ffe4ec, #ffffff);
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      padding: 0;
       margin: 0;
     }
 
@@ -17,23 +16,17 @@
       padding: 1em;
       text-align: center;
       color: white;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    h1 {
-      margin: 0;
-      font-size: 1.8em;
     }
 
     .back-button {
-      display: inline-block;
-      margin-top: 0.5em;
       background-color: #ff4d6d;
       padding: 0.5em 1em;
       color: white;
       text-decoration: none;
       border-radius: 12px;
       font-weight: bold;
+      display: inline-block;
+      margin-top: 0.5em;
     }
 
     main {
@@ -49,7 +42,6 @@
       font-weight: 600;
       margin-top: 1em;
       display: block;
-      color: #333;
     }
 
     form input,
@@ -73,10 +65,6 @@
       border-radius: 12px;
       cursor: pointer;
       font-weight: bold;
-    }
-
-    button[type="submit"]:hover {
-      background: #e43f5a;
     }
   </style>
 </head>
@@ -110,53 +98,6 @@
     </form>
   </main>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyCZ7zsXf4yWALo7byJMCVNo_ySszFObeeY",
-      authDomain: "todolove-989f9.firebaseapp.com",
-      projectId: "todolove-989f9",
-      storageBucket: "todolove-989f9.appspot.com",
-      messagingSenderId: "851030512825",
-      appId: "1:851030512825:web:5b7a2ba992b363a7ab3768",
-      measurementId: "G-JBXFDQWTG4"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const storage = getStorage(app);
-
-    document.getElementById("activity-form").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const form = e.target;
-      const title = form.title.value;
-      const description = form.description.value;
-      const location = form.location.value;
-      const date = form.date.value;
-      const tags = form.tags.value;
-      const photoFile = form.photo.files[0];
-      let photoURL = "";
-
-      if (photoFile) {
-        const storageRef = ref(storage, 'activities/' + Date.now() + '_' + photoFile.name);
-        const snapshot = await uploadBytes(storageRef, photoFile);
-        photoURL = await getDownloadURL(snapshot.ref);
-      }
-
-      await addDoc(collection(db, "activities"), {
-        title,
-        description,
-        location,
-        date,
-        tags,
-        photo: photoURL
-      });
-
-      window.location.href = "index.html";
-    });
-  </script>
+  <script type="module" src="script.js"></script>
 </body>
 </html>
