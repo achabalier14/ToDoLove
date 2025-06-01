@@ -4,11 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Ajouter une activité</title>
+  <link rel="stylesheet" href="style.css" />
   <style>
     body {
       background: linear-gradient(to bottom right, #ffe4ec, #ffffff);
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       margin: 0;
+      padding: 0;
     }
 
     header {
@@ -16,17 +18,22 @@
       padding: 1em;
       text-align: center;
       color: white;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      margin: 0;
     }
 
     .back-button {
+      display: inline-block;
+      margin-top: 0.5em;
       background-color: #ff4d6d;
       padding: 0.5em 1em;
       color: white;
       text-decoration: none;
       border-radius: 12px;
       font-weight: bold;
-      display: inline-block;
-      margin-top: 0.5em;
     }
 
     main {
@@ -42,6 +49,7 @@
       font-weight: 600;
       margin-top: 1em;
       display: block;
+      color: #333;
     }
 
     form input,
@@ -98,6 +106,7 @@
     </form>
   </main>
 
+  <!-- Firebase + Script -->
   <script type="module" src="script.js"></script>
 </body>
 </html>
