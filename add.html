@@ -113,7 +113,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+    import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCZ7zsXf4yWALo7byJMCVNo_ySszFObeeY",
@@ -131,31 +131,38 @@
 
     document.getElementById("activity-form").addEventListener("submit", async (e) => {
       e.preventDefault();
+
       const form = e.target;
-      const title = form.title.value;
-      const description = form.description.value;
-      const location = form.location.value;
+      const title = form.title.value.trim();
+      const description = form.description.value.trim();
+      const location = form.location.value.trim();
       const date = form.date.value;
-      const tags = form.tags.value;
+      const tags = form.tags.value.trim();
       const photoFile = form.photo.files[0];
+
       let photoURL = "";
 
-      if (photoFile) {
-        const storageRef = ref(storage, 'activities/' + Date.now() + '_' + photoFile.name);
-        const snapshot = await uploadBytes(storageRef, photoFile);
-        photoURL = await getDownloadURL(snapshot.ref);
+      try {
+        if (photoFile) {
+          const photoRef = storageRef(storage, 'activities/' + Date.now() + '_' + photoFile.name);
+          const snapshot = await uploadBytes(photoRef, photoFile);
+          photoURL = await getDownloadURL(snapshot.ref);
+        }
+
+        await addDoc(collection(db, "activities"), {
+          title,
+          description,
+          location,
+          date,
+          tags,
+          photo: photoURL
+        });
+
+        window.location.href = "index.html";
+      } catch (err) {
+        alert("Erreur : " + err.message);
+        console.error("Erreur lors de l'ajout :", err);
       }
-
-      await addDoc(collection(db, "activities"), {
-        title,
-        description,
-        location,
-        date,
-        tags,
-        photo: photoURL
-      });
-
-      window.location.href = "index.html";
     });
   </script>
 </body>
