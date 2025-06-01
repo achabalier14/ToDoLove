@@ -1,6 +1,18 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-storage.js";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  getDocs,
+  doc,
+  getDoc
+} from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+import {
+  getStorage,
+  ref,
+  uploadBytes,
+  getDownloadURL
+} from "https://www.gstatic.com/firebasejs/10.11.0/firebase-storage.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCZ7zsXf4yWALo7byJMCVNo_ySszFObeeY",
@@ -81,7 +93,7 @@ if (detailContainer) {
     if (docSnap.exists()) {
       const activity = docSnap.data();
       detailContainer.innerHTML = `
-        ${activity.photo ? `<img src="${activity.photo}" alt="Photo" style="max-width: 100%; border-radius: 12px;" />` : ""}
+        ${activity.photo ? `<img src="${activity.photo}" alt="Photo" />` : ""}
         <h2>${activity.title}</h2>
         ${activity.date ? `<p><strong>Date :</strong> ${activity.date}</p>` : ""}
         ${activity.location ? `<p><strong>Lieu :</strong> ${activity.location}</p>` : ""}
