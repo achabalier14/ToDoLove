@@ -3,28 +3,70 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Détail de l'activité</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>Détails de l'activité</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background-color: #ff6f61;
+      color: white;
+      padding: 20px;
+      text-align: center;
+      position: relative;
+    }
+
+    .back-button {
+      position: absolute;
+      left: 20px;
+      top: 20px;
+      text-decoration: none;
+      color: white;
+      font-weight: bold;
+    }
+
+    main {
+      max-width: 600px;
+      margin: 40px auto;
+      background-color: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      margin-top: 0;
+      color: #ff6f61;
+    }
+
+    p {
+      line-height: 1.6;
+    }
+  </style>
 </head>
 <body>
   <header>
-    <h1>Détails de l'activité</h1>
     <a href="index.html" class="back-button">⬅ Retour</a>
+    <h1>Détails de l'activité</h1>
   </header>
 
   <main id="detail-container">
-    <!-- Détails de l'activité injectés dynamiquement -->
+    <!-- Contenu injecté ici -->
   </main>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCZ7zsXf4yWALo7byJMCVNo_ySszFObeeY",
       authDomain: "todolove-989f9.firebaseapp.com",
       projectId: "todolove-989f9",
-      storageBucket: "todolove-989f9.appspot.com",
+      storageBucket: "todolove-989f9.firebasestorage.app",
       messagingSenderId: "851030512825",
       appId: "1:851030512825:web:5b7a2ba992b363a7ab3768",
       measurementId: "G-JBXFDQWTG4"
@@ -37,7 +79,7 @@
     const params = new URLSearchParams(window.location.search);
     const id = params.get("id");
 
-    const fetchActivity = async () => {
+    async function loadActivity() {
       try {
         const docRef = doc(db, "activities", id);
         const docSnap = await getDoc(docRef);
@@ -50,20 +92,19 @@
         const activity = docSnap.data();
 
         container.innerHTML = `
-          ${activity.photo ? `<img src="${activity.photo}" alt="Photo" style="max-width: 100%; border-radius: 12px;" />` : ""}
           <h2>${activity.title}</h2>
           ${activity.date ? `<p><strong>Date :</strong> ${activity.date}</p>` : ""}
           ${activity.location ? `<p><strong>Lieu :</strong> ${activity.location}</p>` : ""}
           ${activity.description ? `<p>${activity.description}</p>` : ""}
           ${activity.tags ? `<p><strong>Tags :</strong> ${activity.tags}</p>` : ""}
         `;
-      } catch (error) {
-        console.error("Erreur de chargement :", error);
-        container.innerHTML = "<p>Erreur lors de la récupération de l'activité.</p>";
+      } catch (e) {
+        container.innerHTML = "<p>Erreur de chargement.</p>";
+        console.error(e);
       }
-    };
+    }
 
-    fetchActivity();
+    loadActivity();
   </script>
 </body>
 </html>

@@ -4,95 +4,82 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Ajouter une activité</title>
-  <link rel="stylesheet" href="style.css" />
   <style>
     body {
-      background: linear-gradient(to bottom right, #ffe4ec, #ffffff);
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
       margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
     }
 
     header {
-      background-color: #ff8fa3;
-      padding: 1em;
-      text-align: center;
+      background-color: #ff6f61;
       color: white;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    h1 {
-      margin: 0;
-      font-size: 1.8em;
+      padding: 20px;
+      text-align: center;
+      position: relative;
     }
 
     .back-button {
-      display: inline-block;
-      margin-top: 0.5em;
-      background-color: #ff4d6d;
-      padding: 0.5em 1em;
-      color: white;
+      position: absolute;
+      left: 20px;
+      top: 20px;
       text-decoration: none;
-      border-radius: 12px;
+      color: white;
       font-weight: bold;
     }
 
     main {
-      max-width: 500px;
-      margin: 2em auto;
-      background: white;
-      padding: 2em;
-      border-radius: 16px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      max-width: 600px;
+      margin: 40px auto;
+      background-color: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
 
     form label {
-      font-weight: 600;
-      margin-top: 1em;
       display: block;
-      color: #333;
+      margin-top: 15px;
+      font-weight: bold;
     }
 
-    form input,
+    form input[type="text"],
+    form input[type="date"],
+    form input[type="file"],
     form textarea {
       width: 100%;
-      padding: 0.8em;
-      margin-top: 0.3em;
+      padding: 10px;
+      margin-top: 5px;
       border: 1px solid #ccc;
-      border-radius: 10px;
-      font-size: 1em;
-      transition: border-color 0.3s ease;
+      border-radius: 5px;
     }
 
-    form input:focus,
-    form textarea:focus {
-      border-color: #ff8fa3;
-      outline: none;
+    form textarea {
+      resize: vertical;
+      min-height: 80px;
     }
 
-    button[type="submit"] {
-      margin-top: 1.5em;
-      width: 100%;
-      background: #ff4d6d;
+    button {
+      margin-top: 20px;
+      background-color: #ff6f61;
       color: white;
       border: none;
-      padding: 0.8em;
-      font-size: 1.1em;
-      border-radius: 12px;
+      padding: 12px 20px;
+      border-radius: 5px;
       cursor: pointer;
-      font-weight: bold;
-      transition: background 0.3s ease;
+      font-size: 16px;
     }
 
-    button[type="submit"]:hover {
-      background: #e43f5a;
+    button:hover {
+      background-color: #ff4b3e;
     }
   </style>
 </head>
 <body>
   <header>
-    <h1>Nouvelle activité 💡</h1>
     <a href="index.html" class="back-button">⬅ Retour</a>
+    <h1>Nouvelle activité 💡</h1>
   </header>
 
   <main>
@@ -109,7 +96,7 @@
       <label>Date</label>
       <input type="date" name="date" />
 
-      <label>Tags (ex: voyage, film...)</label>
+      <label>Tags</label>
       <input type="text" name="tags" placeholder="film, nature, détente..." />
 
       <label>Photo</label>
@@ -119,6 +106,50 @@
     </form>
   </main>
 
-  <script src="script.js"></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCZ7zsXf4yWALo7byJMCVNo_ySszFObeeY",
+      authDomain: "todolove-989f9.firebaseapp.com",
+      projectId: "todolove-989f9",
+      storageBucket: "todolove-989f9.firebasestorage.app",
+      messagingSenderId: "851030512825",
+      appId: "1:851030512825:web:5b7a2ba992b363a7ab3768",
+      measurementId: "G-JBXFDQWTG4"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    document.getElementById("activity-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const form = e.target;
+      const title = form.title.value;
+      const description = form.description.value;
+      const location = form.location.value;
+      const date = form.date.value;
+      const tags = form.tags.value;
+
+      try {
+        await addDoc(collection(db, "activities"), {
+          title,
+          description,
+          location,
+          date,
+          tags,
+          done: false,
+          createdAt: new Date()
+        });
+
+        alert("Activité ajoutée !");
+        window.location.href = "index.html";
+      } catch (err) {
+        alert("Erreur : " + err.message);
+      }
+    });
+  </script>
 </body>
 </html>
