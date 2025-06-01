@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Détail de l'activité</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>Détails de l'activité</h1>
+    <a href="index.html" class="back-button">⬅ Retour</a>
+  </header>
+
+  <main id="detail-container">
+    <!-- Détails de l'activité injectés dynamiquement -->
+  </main>
+
+  <script>
+    const container = document.getElementById("detail-container");
+    const params = new URLSearchParams(window.location.search);
+    const id = parseInt(params.get("id"));
+
+    const activities = JSON.parse(localStorage.getItem("activities")) || [];
+    const activity = activities.find((a) => a.id === id);
+
+    if (!activity) {
+      container.innerHTML = "<p>Activité introuvable.</p>";
+    } else {
+      container.innerHTML = `
+        ${activity.photo ? `<img src="${activity.photo}" alt="Photo" style="max-width: 100%; border-radius: 12px;" />` : ""}
+        <h2>${activity.title}</h2>
+        ${activity.date ? `<p><strong>Date :</strong> ${activity.date}</p>` : ""}
+        ${activity.location ? `<p><strong>Lieu :</strong> ${activity.location}</p>` : ""}
+        ${activity.description ? `<p>${activity.description}</p>` : ""}
+        ${activity.tags ? `<p><strong>Tags :</strong> ${activity.tags}</p>` : ""}
+        <button id="mark-done">Marquer comme fait ✅</button>
+      `;
+
+      document.getElementById("mark-done").addEventListener("click", () => {
+        activity.done = true;
+        localStorage.setItem("activities", JSON.stringify(activities));
+        alert("Activité marquée comme souvenir ! 🎉");
+        window.location.href = "index.html";
+      });
+    }
+  </script>
+</body>
+</html>
