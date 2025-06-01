@@ -80,11 +80,10 @@
     <p>Chargement en cours...</p>
   </main>
 
-  <!-- Firebase (CDN) -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
-  <script>
     const firebaseConfig = {
       apiKey: "AIzaSyCZ7zsXf4yWALo7byJMCVNo_ySszFObeeY",
       authDomain: "todolove-989f9.firebaseapp.com",
@@ -95,45 +94,29 @@
       measurementId: "G-JBXFDQWTG4"
     };
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
     const container = document.getElementById("detail-container");
     const params = new URLSearchParams(window.location.search);
     const id = params.get("id");
 
-    db.collection("activities").doc(id).get().then(doc => {
-      if (!doc.exists) {
-        container.innerHTML = "<p>Activité introuvable.</p>";
-        return;
-      }
+    const docRef = doc(db, "activities", id);
+    const docSnap = await getDoc(docRef);
 
-      const activity = doc.data();
-
+    if (!docSnap.exists()) {
+      container.innerHTML = "<p>Activité introuvable.</p>";
+    } else {
+      const activity = docSnap.data();
       container.innerHTML = `
-        ${activity.photo ? `<img src="${activity.photo}" alt="Photo" />` : ""}
+        ${activity.photo ? `<img src="${activity.photo}" alt="Photo" style="max-width: 100%; border-radius: 12px;" />` : ""}
         <h2>${activity.title}</h2>
         ${activity.date ? `<p><strong>Date :</strong> ${activity.date}</p>` : ""}
         ${activity.location ? `<p><strong>Lieu :</strong> ${activity.location}</p>` : ""}
         ${activity.description ? `<p>${activity.description}</p>` : ""}
         ${activity.tags ? `<p><strong>Tags :</strong> ${activity.tags}</p>` : ""}
-        <button id="mark-done">Marquer comme fait ✅</button>
       `;
-
-      document.getElementById("mark-done").addEventListener("click", () => {
-        db.collection("activities").doc(id).update({ done: true })
-          .then(() => {
-            alert("Activité marquée comme souvenir ! 🎉");
-            window.location.href = "index.html";
-          })
-          .catch((error) => {
-            alert("Erreur : " + error.message);
-          });
-      });
-    }).catch(error => {
-      container.innerHTML = "<p>Erreur de chargement.</p>";
-      console.error(error);
-    });
+    }
   </script>
 </body>
 </html>
