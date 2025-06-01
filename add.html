@@ -4,13 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Ajouter une activité</title>
-  <link rel="stylesheet" href="style.css" />
   <style>
     body {
       background: linear-gradient(to bottom right, #ffe4ec, #ffffff);
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      margin: 0;
       padding: 0;
+      margin: 0;
     }
 
     header {
@@ -23,6 +22,7 @@
 
     h1 {
       margin: 0;
+      font-size: 1.8em;
     }
 
     .back-button {
@@ -60,6 +60,13 @@
       border: 1px solid #ccc;
       border-radius: 10px;
       font-size: 1em;
+      transition: border-color 0.3s ease;
+    }
+
+    form input:focus,
+    form textarea:focus {
+      border-color: #ff8fa3;
+      outline: none;
     }
 
     button[type="submit"] {
@@ -73,6 +80,11 @@
       border-radius: 12px;
       cursor: pointer;
       font-weight: bold;
+      transition: background 0.3s ease;
+    }
+
+    button[type="submit"]:hover {
+      background: #e43f5a;
     }
   </style>
 </head>
@@ -85,19 +97,19 @@
   <main>
     <form id="activity-form">
       <label>Titre *</label>
-      <input type="text" name="title" required />
+      <input type="text" name="title" required placeholder="Ex: Dîner romantique" />
 
       <label>Description</label>
-      <textarea name="description"></textarea>
+      <textarea name="description" placeholder="Quelques détails ou idées..."></textarea>
 
       <label>Lieu</label>
-      <input type="text" name="location" />
+      <input type="text" name="location" placeholder="Ex: Paris, chez nous, plage..." />
 
       <label>Date</label>
       <input type="date" name="date" />
 
-      <label>Tags</label>
-      <input type="text" name="tags" />
+      <label>Tags (ex: voyage, film...)</label>
+      <input type="text" name="tags" placeholder="film, nature, détente..." />
 
       <label>Photo</label>
       <input type="file" name="photo" accept="image/*" />
@@ -106,7 +118,60 @@
     </form>
   </main>
 
-  <!-- Firebase + Script -->
-  <script type="module" src="script.js"></script>
+  <script type="module">
+    // Import Firebase depuis les CDN
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCZ7zsXf4yWALo7byJMCVNo_ySszFObeeY",
+      authDomain: "todolove-989f9.firebaseapp.com",
+      projectId: "todolove-989f9",
+      storageBucket: "todolove-989f9.appspot.com",
+      messagingSenderId: "851030512825",
+      appId: "1:851030512825:web:5b7a2ba992b363a7ab3768",
+      measurementId: "G-JBXFDQWTG4"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+
+    const form = document.getElementById("activity-form");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const title = form.title.value;
+      const description = form.description.value;
+      const location = form.location.value;
+      const date = form.date.value;
+      const tags = form.tags.value;
+      const photoFile = form.photo.files[0];
+
+      let photoURL = "";
+
+      if (photoFile) {
+        const storageRef = ref(storage, 'activities/' + Date.now() + '_' + photoFile.name);
+        const snapshot = await uploadBytes(storageRef, photoFile);
+        photoURL = await getDownloadURL(snapshot.ref);
+      }
+
+      await addDoc(collection(db, "activities"), {
+        title,
+        description,
+        location,
+        date,
+        tags,
+        photo: photoURL,
+        done: false,
+        createdAt: new Date()
+      });
+
+      alert("Activité ajoutée avec succès !");
+      window.location.href = "index.html";
+    });
+  </script>
 </body>
 </html>
