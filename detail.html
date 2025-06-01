@@ -5,6 +5,70 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Détail de l'activité</title>
   <link rel="stylesheet" href="style.css" />
+  <style>
+    header {
+      background-color: #ff8fa3;
+      padding: 1em;
+      text-align: center;
+      color: white;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .back-button {
+      display: inline-block;
+      margin-top: 0.5em;
+      background-color: #ff4d6d;
+      padding: 0.5em 1em;
+      color: white;
+      text-decoration: none;
+      border-radius: 12px;
+      font-weight: bold;
+    }
+
+    main {
+      max-width: 600px;
+      margin: 2em auto;
+      background: white;
+      padding: 2em;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    h2 {
+      margin-top: 0.5em;
+      font-size: 1.6em;
+      color: #333;
+    }
+
+    p {
+      margin: 0.5em 0;
+      font-size: 1.1em;
+    }
+
+    img {
+      max-width: 100%;
+      border-radius: 12px;
+      margin-bottom: 1em;
+    }
+
+    button {
+      margin-top: 1.5em;
+      width: 100%;
+      background: #28a745;
+      color: white;
+      border: none;
+      padding: 0.8em;
+      font-size: 1.1em;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background: #218838;
+    }
+  </style>
 </head>
 <body>
   <header>
@@ -13,22 +77,41 @@
   </header>
 
   <main id="detail-container">
-    <!-- Détails de l'activité injectés dynamiquement -->
+    <p>Chargement en cours...</p>
   </main>
 
+  <!-- Firebase (CDN) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
+
   <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCZ7zsXf4yWALo7byJMCVNo_ySszFObeeY",
+      authDomain: "todolove-989f9.firebaseapp.com",
+      projectId: "todolove-989f9",
+      storageBucket: "todolove-989f9.appspot.com",
+      messagingSenderId: "851030512825",
+      appId: "1:851030512825:web:5b7a2ba992b363a7ab3768",
+      measurementId: "G-JBXFDQWTG4"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
     const container = document.getElementById("detail-container");
     const params = new URLSearchParams(window.location.search);
-    const id = parseInt(params.get("id"));
+    const id = params.get("id");
 
-    const activities = JSON.parse(localStorage.getItem("activities")) || [];
-    const activity = activities.find((a) => a.id === id);
+    db.collection("activities").doc(id).get().then(doc => {
+      if (!doc.exists) {
+        container.innerHTML = "<p>Activité introuvable.</p>";
+        return;
+      }
 
-    if (!activity) {
-      container.innerHTML = "<p>Activité introuvable.</p>";
-    } else {
+      const activity = doc.data();
+
       container.innerHTML = `
-        ${activity.photo ? `<img src="${activity.photo}" alt="Photo" style="max-width: 100%; border-radius: 12px;" />` : ""}
+        ${activity.photo ? `<img src="${activity.photo}" alt="Photo" />` : ""}
         <h2>${activity.title}</h2>
         ${activity.date ? `<p><strong>Date :</strong> ${activity.date}</p>` : ""}
         ${activity.location ? `<p><strong>Lieu :</strong> ${activity.location}</p>` : ""}
@@ -38,12 +121,19 @@
       `;
 
       document.getElementById("mark-done").addEventListener("click", () => {
-        activity.done = true;
-        localStorage.setItem("activities", JSON.stringify(activities));
-        alert("Activité marquée comme souvenir ! 🎉");
-        window.location.href = "index.html";
+        db.collection("activities").doc(id).update({ done: true })
+          .then(() => {
+            alert("Activité marquée comme souvenir ! 🎉");
+            window.location.href = "index.html";
+          })
+          .catch((error) => {
+            alert("Erreur : " + error.message);
+          });
       });
-    }
+    }).catch(error => {
+      container.innerHTML = "<p>Erreur de chargement.</p>";
+      console.error(error);
+    });
   </script>
 </body>
 </html>
