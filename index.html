@@ -1,27 +1,82 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Nos activités.. ❤️</title>
-  <link rel="stylesheet" href="style.css" />
-
-  <!-- Firebase CDN à ajouter dans TOUS tes fichiers HTML -->
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
-<script src="script.js"></script>
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ToDoLove - Accueil</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
+  <script src="script.js"></script>
 </head>
 <body>
   <header>
-    <h1>Nos activités ❤️</h1>
+    <h1>Nos activités à faire .❤️</h1>
     <a href="add.html" class="add-button">+ Ajouter</a>
   </header>
+  <main id="cards-container"></main>
+</body>
+</html>
 
-  <main id="cards-container">
-    <!-- Les cartes seront générées dynamiquement ici -->
+
+=== add.html ===
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ajouter une activité</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
+  <script src="script.js"></script>
+</head>
+<body>
+  <header>
+    <h1>Nouvelle activité 💡</h1>
+    <a href="index.html" class="back-button">⬅ Retour</a>
+  </header>
+  <main>
+    <form id="activity-form">
+      <label>Titre *</label>
+      <input type="text" name="title" required placeholder="Ex: Dîner romantique" />
+      <label>Description</label>
+      <textarea name="description"></textarea>
+      <label>Lieu</label>
+      <input type="text" name="location" />
+      <label>Date</label>
+      <input type="date" name="date" />
+      <label>Tags</label>
+      <input type="text" name="tags" />
+      <label>Photo</label>
+      <input type="file" name="photo" accept="image/*" />
+      <button type="submit">Ajouter cette activité ✨</button>
+    </form>
   </main>
+</body>
+</html>
 
+
+=== detail.html ===
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Détail de l'activité</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
+  <script src="script.js"></script>
+</head>
+<body>
+  <header>
+    <h1>Détails de l'activité</h1>
+    <a href="index.html" class="back-button">⬅ Retour</a>
+  </header>
+  <main id="detail-container"></main>
 </body>
 </html>

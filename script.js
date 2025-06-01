@@ -1,4 +1,3 @@
-// Configuration de Firebase (remplace par tes infos exactes)
 const firebaseConfig = {
   apiKey: "AIzaSyDlI-qmSUEEAXZ-PnXftAxh-UljIHD0AHs",
   authDomain: "todolove-989f9.firebaseapp.com",
@@ -8,12 +7,10 @@ const firebaseConfig = {
   appId: "1:674330259245:web:6d6102bc0f8f7ad03c8084"
 };
 
-// Initialisation Firebase
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const storage = firebase.storage();
 
-// Ajout d'une activité (depuis add.html)
 const form = document.getElementById("activity-form");
 if (form) {
   form.addEventListener("submit", async (e) => {
@@ -48,7 +45,6 @@ if (form) {
   });
 }
 
-// Affichage des activités sur index.html
 const container = document.getElementById("cards-container");
 if (container) {
   db.collection("activities").orderBy("createdAt", "desc").onSnapshot((snapshot) => {
@@ -70,7 +66,6 @@ if (container) {
   });
 }
 
-// Affichage détail (detail.html)
 const detail = document.getElementById("detail-container");
 if (detail) {
   const params = new URLSearchParams(window.location.search);
