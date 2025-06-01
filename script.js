@@ -4,8 +4,7 @@ import {
   collection,
   addDoc,
   getDocs,
-  doc,
-  getDoc
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -21,8 +20,37 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// ----- Ajout d'une activité -----
+const container = document.getElementById("cards-container");
 const form = document.getElementById("activity-form");
+
+if (container) {
+  const loadActivities = async () => {
+    const querySnapshot = await getDocs(collection(db, "activities"));
+    if (querySnapshot.empty) {
+      container.innerHTML = "<p>Aucune activité enregistrée.</p>";
+      return;
+    }
+
+    querySnapshot.forEach((docSnap) => {
+      const act = docSnap.data();
+      const id = docSnap.id;
+
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = `
+        ${act.photo ? `<img src="${act.photo}" alt="Photo" />` : ""}
+        <div class="card-title">${act.title}</div>
+        ${act.location ? `<div class="card-location">📍 ${act.location}</div>` : ""}
+        ${act.date ? `<div class="card-date">📅 ${act.date}</div>` : ""}
+        <a href="detail.html?id=${id}" class="detail-link">Voir les détails</a>
+      `;
+      container.appendChild(card);
+    });
+  };
+
+  loadActivities();
+}
+
 if (form) {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -31,48 +59,29 @@ if (form) {
     const location = form.location.value;
     const date = form.date.value;
     const tags = form.tags.value;
-    const photoInput = form.photo;
+    const photoFile = form.photo.files[0];
 
-    const saveActivity = async (photoData) => {
+    let photoURL = "";
+    if (photoFile) {
+      photoURL = URL.createObjectURL(photoFile); // temporaire (remplacer par Firebase Storage plus tard)
+    }
+
+    try {
       await addDoc(collection(db, "activities"), {
         title,
         description,
         location,
         date,
         tags,
-        photo: photoData || null,
+        photo: photoURL,
+        createdAt: serverTimestamp(),
       });
+
+      alert("Activité ajoutée avec succès !");
       window.location.href = "index.html";
-    };
-
-    if (photoInput.files.length > 0) {
-      const reader = new FileReader();
-      reader.onload = function (event) {
-        saveActivity(event.target.result);
-      };
-      reader.readAsDataURL(photoInput.files[0]);
-    } else {
-      saveActivity(null);
+    } catch (error) {
+      console.error("Erreur d'ajout :", error);
+      alert("Erreur lors de l'ajout de l'activité.");
     }
-  });
-}
-
-// ----- Affichage des activités -----
-const container = document.getElementById("cards-container");
-if (container) {
-  const querySnapshot = await getDocs(collection(db, "activities"));
-  querySnapshot.forEach((docSnap) => {
-    const act = docSnap.data();
-    const id = docSnap.id;
-    const card = document.createElement("div");
-    card.className = "card";
-    card.innerHTML = `
-      ${act.photo ? `<img src="${act.photo}" alt="Photo" />` : ""}
-      <div class="card-title">${act.title}</div>
-      ${act.location ? `<div class="card-location">📍 ${act.location}</div>` : ""}
-      ${act.date ? `<div class="card-date">📅 ${act.date}</div>` : ""}
-      <a href="detail.html?id=${id}" class="detail-link">Voir les détails</a>
-    `;
-    container.appendChild(card);
   });
 }
