@@ -1,9 +1,26 @@
+// Firebase config
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCZ7zsXf4yWALo7byJMCVNo_ySszFObeeY",
+  authDomain: "todolove-989f9.firebaseapp.com",
+  projectId: "todolove-989f9",
+  storageBucket: "todolove-989f9.appspot.com",
+  messagingSenderId: "851030512825",
+  appId: "1:851030512825:web:5b7a2ba992b363a7ab3768",
+  measurementId: "G-JBXFDQWTG4"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
 let activities = JSON.parse(localStorage.getItem("activities")) || [];
 
 if (document.getElementById("activity-form")) {
   const form = document.getElementById("activity-form");
 
-  form.addEventListener("submit", (e) => {
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const title = form.title.value;
     const description = form.description.value;
@@ -12,40 +29,40 @@ if (document.getElementById("activity-form")) {
     const tags = form.tags.value;
     const photoInput = form.photo;
 
-    const reader = new FileReader();
-    reader.onload = function (event) {
-      const photoData = event.target.result;
-      const newActivity = {
-        id: Date.now(),
-        title,
-        description,
-        location,
-        date,
-        tags,
-        photo: photoData,
-        done: false,
-      };
+    const newActivity = {
+      id: Date.now(),
+      title,
+      description,
+      location,
+      date,
+      tags,
+      photo: null,
+      done: false,
+    };
+
+    const saveAndRedirect = async () => {
       activities.push(newActivity);
       localStorage.setItem("activities", JSON.stringify(activities));
+
+      try {
+        await addDoc(collection(db, "activities"), newActivity);
+        console.log("✅ Activité ajoutée dans Firestore");
+      } catch (err) {
+        console.error("❌ Erreur Firestore :", err);
+      }
+
       window.location.href = "index.html";
     };
 
     if (photoInput.files.length > 0) {
+      const reader = new FileReader();
+      reader.onload = function (event) {
+        newActivity.photo = event.target.result;
+        saveAndRedirect();
+      };
       reader.readAsDataURL(photoInput.files[0]);
     } else {
-      const newActivity = {
-        id: Date.now(),
-        title,
-        description,
-        location,
-        date,
-        tags,
-        photo: null,
-        done: false,
-      };
-      activities.push(newActivity);
-      localStorage.setItem("activities", JSON.stringify(activities));
-      window.location.href = "index.html";
+      saveAndRedirect();
     }
   });
 }

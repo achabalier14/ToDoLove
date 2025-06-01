@@ -93,25 +93,6 @@
   <header>
     <h1>Nouvelle activité 💡</h1>
     <a href="index.html" class="back-button">⬅ Retour</a>
-    <!-- Firebase App (core) -->
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
-<!-- Firebase Database -->
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js"></script>
-<script>
-  const firebaseConfig = {
-    apiKey: "TA_CLE_API",
-    authDomain: "ton-projet.firebaseapp.com",
-    databaseURL: "https://ton-projet.firebaseio.com",
-    projectId: "ton-projet",
-    storageBucket: "ton-projet.appspot.com",
-    messagingSenderId: "xxxxxx",
-    appId: "1:xxxxxxx:web:xxxxxxxx"
-  };
-
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
-</script>
-
   </header>
 
   <main>
@@ -138,6 +119,7 @@
     </form>
   </main>
 
-  <script src="script.js"></script>
+  <!-- Firebase -->
+  <script type="module" src="script.js"></script>
 </body>
 </html>
