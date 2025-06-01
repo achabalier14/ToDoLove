@@ -4,78 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Nos activités ❤️</title>
-  <style>
-    body {
-      background: #fff0f5;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      margin: 0;
-      padding: 0;
-    }
-
-    header {
-      background-color: #ff8fa3;
-      padding: 1em;
-      text-align: center;
-      color: white;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-
-    h1 {
-      margin: 0;
-      font-size: 1.8em;
-    }
-
-    .add-button {
-      display: inline-block;
-      margin-top: 1em;
-      background-color: #ff4d6d;
-      padding: 0.5em 1em;
-      color: white;
-      text-decoration: none;
-      border-radius: 12px;
-      font-weight: bold;
-    }
-
-    main {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 1em;
-      padding: 2em;
-    }
-
-    .card {
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      width: 250px;
-      text-align: center;
-      text-decoration: none;
-      color: black;
-      overflow: hidden;
-    }
-
-    .card img {
-      width: 100%;
-      height: 160px;
-      object-fit: cover;
-    }
-
-    .card h3 {
-      margin: 0.5em 0;
-      padding: 0 1em;
-    }
-
-    .card p {
-      font-size: 0.9em;
-      color: #555;
-      padding: 0 1em 1em;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <header>
-    <h1>Nos activités ❤️</h1>
+    <h1>Nos activités. ❤️</h1>
     <a href="add.html" class="add-button">+ Ajouter</a>
   </header>
 
@@ -83,42 +16,6 @@
     <!-- Les cartes seront générées dynamiquement ici -->
   </main>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyCZ7zsXf4yWALo7byJMCVNo_ySszFObeeY",
-      authDomain: "todolove-989f9.firebaseapp.com",
-      projectId: "todolove-989f9",
-      storageBucket: "todolove-989f9.appspot.com",
-      messagingSenderId: "851030512825",
-      appId: "1:851030512825:web:5b7a2ba992b363a7ab3768",
-      measurementId: "G-JBXFDQWTG4"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    const container = document.getElementById("cards-container");
-
-    async function loadActivities() {
-      const querySnapshot = await getDocs(collection(db, "activities"));
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        const card = document.createElement("a");
-        card.className = "card";
-        card.href = `detail.html?id=${doc.id}`;
-        card.innerHTML = `
-          ${data.photo ? `<img src="${data.photo}" alt="Photo">` : ""}
-          <h3>${data.title}</h3>
-          <p>${data.date || ""}</p>
-        `;
-        container.appendChild(card);
-      });
-    }
-
-    loadActivities();
-  </script>
+  <script type="module" src="script.js"></script>
 </body>
 </html>

@@ -86,14 +86,14 @@
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
         const data = docSnap.data();
-        container.innerHTML = `
-          ${data.photo ? `<img src="${data.photo}" alt="Photo">` : ""}
+        container.innerHTML = 
+          ${data.photo ? <img src="${data.photo}" alt="Photo"> : ""}
           <h2>${data.title}</h2>
           <p><strong>Date :</strong> ${data.date}</p>
           <p><strong>Lieu :</strong> ${data.location}</p>
           <p><strong>Description :</strong> ${data.description}</p>
           <p><strong>Tags :</strong> ${data.tags}</p>
-        `;
+        ;
       } else {
         container.innerHTML = "<p>Activité introuvable.</p>";
       }
