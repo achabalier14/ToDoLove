@@ -4,82 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Ajouter une activité</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #f4f4f4;
-    }
-
-    header {
-      background-color: #ff6f61;
-      color: white;
-      padding: 20px;
-      text-align: center;
-      position: relative;
-    }
-
-    .back-button {
-      position: absolute;
-      left: 20px;
-      top: 20px;
-      text-decoration: none;
-      color: white;
-      font-weight: bold;
-    }
-
-    main {
-      max-width: 600px;
-      margin: 40px auto;
-      background-color: white;
-      padding: 30px;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-
-    form label {
-      display: block;
-      margin-top: 15px;
-      font-weight: bold;
-    }
-
-    form input[type="text"],
-    form input[type="date"],
-    form input[type="file"],
-    form textarea {
-      width: 100%;
-      padding: 10px;
-      margin-top: 5px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-
-    form textarea {
-      resize: vertical;
-      min-height: 80px;
-    }
-
-    button {
-      margin-top: 20px;
-      background-color: #ff6f61;
-      color: white;
-      border: none;
-      padding: 12px 20px;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 16px;
-    }
-
-    button:hover {
-      background-color: #ff4b3e;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <header>
-    <a href="index.html" class="back-button">⬅ Retour</a>
     <h1>Nouvelle activité 💡</h1>
+    <a href="index.html" class="back-button">⬅ Retour</a>
   </header>
 
   <main>
@@ -106,15 +36,17 @@
     </form>
   </main>
 
+  <!-- Firebase & JS -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCZ7zsXf4yWALo7byJMCVNo_ySszFObeeY",
       authDomain: "todolove-989f9.firebaseapp.com",
       projectId: "todolove-989f9",
-      storageBucket: "todolove-989f9.firebasestorage.app",
+      storageBucket: "todolove-989f9.appspot.com",
       messagingSenderId: "851030512825",
       appId: "1:851030512825:web:5b7a2ba992b363a7ab3768",
       measurementId: "G-JBXFDQWTG4"
@@ -122,33 +54,38 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    const storage = getStorage(app);
 
     document.getElementById("activity-form").addEventListener("submit", async (e) => {
       e.preventDefault();
-
       const form = e.target;
       const title = form.title.value;
       const description = form.description.value;
       const location = form.location.value;
       const date = form.date.value;
       const tags = form.tags.value;
+      const photoFile = form.photo.files[0];
 
-      try {
-        await addDoc(collection(db, "activities"), {
-          title,
-          description,
-          location,
-          date,
-          tags,
-          done: false,
-          createdAt: new Date()
-        });
+      let photoURL = "";
 
-        alert("Activité ajoutée !");
-        window.location.href = "index.html";
-      } catch (err) {
-        alert("Erreur : " + err.message);
+      if (photoFile) {
+        const storageRef = ref(storage, 'activities/' + Date.now() + '_' + photoFile.name);
+        const snapshot = await uploadBytes(storageRef, photoFile);
+        photoURL = await getDownloadURL(snapshot.ref);
       }
+
+      const activity = {
+        title,
+        description,
+        location,
+        date,
+        tags,
+        photo: photoURL
+      };
+
+      await addDoc(collection(db, "activities"), activity);
+      alert("Activité ajoutée avec succès !");
+      window.location.href = "index.html";
     });
   </script>
 </body>
