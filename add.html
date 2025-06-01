@@ -131,6 +131,7 @@
 
     document.getElementById("activity-form").addEventListener("submit", async (e) => {
       e.preventDefault();
+
       const form = e.target;
       const title = form.title.value;
       const description = form.description.value;
@@ -140,22 +141,30 @@
       const photoFile = form.photo.files[0];
       let photoURL = "";
 
-      if (photoFile) {
-        const storageRef = ref(storage, 'activities/' + Date.now() + '_' + photoFile.name);
-        const snapshot = await uploadBytes(storageRef, photoFile);
-        photoURL = await getDownloadURL(snapshot.ref);
+      try {
+        // Upload photo if provided
+        if (photoFile) {
+          const storageRef = ref(storage, 'activities/' + Date.now() + '_' + photoFile.name);
+          const snapshot = await uploadBytes(storageRef, photoFile);
+          photoURL = await getDownloadURL(snapshot.ref);
+        }
+
+        // Add activity to Firestore
+        await addDoc(collection(db, "activities"), {
+          title,
+          description,
+          location,
+          date,
+          tags,
+          photo: photoURL
+        });
+
+        // Redirect to home
+        window.location.href = "index.html";
+      } catch (error) {
+        alert("Erreur lors de l'ajout de l'activité : " + error.message);
+        console.error(error);
       }
-
-      await addDoc(collection(db, "activities"), {
-        title,
-        description,
-        location,
-        date,
-        tags,
-        photo: photoURL
-      });
-
-      window.location.href = "index.html";
     });
   </script>
 </body>
