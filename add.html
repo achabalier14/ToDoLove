@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Ajouter une activité</title>
   <style>
     body {
@@ -118,10 +118,10 @@
     </form>
   </main>
 
+  <!-- Firebase -->
   <script type="module">
-    // Import Firebase depuis les CDN
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
     import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
     const firebaseConfig = {
@@ -143,34 +143,45 @@
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
 
-      const title = form.title.value;
-      const description = form.description.value;
-      const location = form.location.value;
+      const title = form.title.value.trim();
+      const description = form.description.value.trim();
+      const location = form.location.value.trim();
       const date = form.date.value;
-      const tags = form.tags.value;
+      const tags = form.tags.value.trim();
       const photoFile = form.photo.files[0];
 
       let photoURL = "";
 
       if (photoFile) {
-        const storageRef = ref(storage, 'activities/' + Date.now() + '_' + photoFile.name);
-        const snapshot = await uploadBytes(storageRef, photoFile);
-        photoURL = await getDownloadURL(snapshot.ref);
+        try {
+          const photoRef = ref(storage, 'activities/' + Date.now() + '_' + photoFile.name);
+          const snapshot = await uploadBytes(photoRef, photoFile);
+          photoURL = await getDownloadURL(snapshot.ref);
+        } catch (error) {
+          console.error("Erreur lors de l'envoi de l'image :", error);
+          alert("Erreur d'envoi de l'image.");
+          return;
+        }
       }
 
-      await addDoc(collection(db, "activities"), {
-        title,
-        description,
-        location,
-        date,
-        tags,
-        photo: photoURL,
-        done: false,
-        createdAt: new Date()
-      });
+      try {
+        await addDoc(collection(db, "activities"), {
+          title,
+          description,
+          location,
+          date,
+          tags,
+          photo: photoURL,
+          done: false,
+          createdAt: serverTimestamp()
+        });
 
-      alert("Activité ajoutée avec succès !");
-      window.location.href = "index.html";
+        alert("Activité ajoutée avec succès !");
+        window.location.href = "index.html";
+      } catch (error) {
+        console.error("Erreur lors de l'ajout :", error);
+        alert("Erreur lors de l'envoi de l'activité.");
+      }
     });
   </script>
 </body>
