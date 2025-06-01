@@ -28,7 +28,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const storage = getStorage(app);
 
-// Gérer le formulaire (add.html)
+// PAGE D'AJOUT
 const form = document.getElementById("activity-form");
 if (form) {
   form.addEventListener("submit", async (e) => {
@@ -60,4 +60,49 @@ if (form) {
 
     window.location.href = "index.html";
   });
+}
+
+// PAGE D'ACCUEIL : index.html
+const container = document.getElementById("cards-container");
+if (container) {
+  const querySnapshot = await getDocs(collection(db, "activities"));
+  querySnapshot.forEach((docSnap) => {
+    const activity = docSnap.data();
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      ${activity.photo ? `<img src="${activity.photo}" alt="Photo activité" style="max-width: 100%; border-radius: 12px;" />` : ""}
+      <h2>${activity.title}</h2>
+      ${activity.date ? `<p><strong>Date :</strong> ${activity.date}</p>` : ""}
+      ${activity.location ? `<p><strong>Lieu :</strong> ${activity.location}</p>` : ""}
+      <a href="detail.html?id=${docSnap.id}">Voir détails</a>
+    `;
+    container.appendChild(card);
+  });
+}
+
+// PAGE DE DÉTAIL : detail.html
+const detailContainer = document.getElementById("detail-container");
+if (detailContainer) {
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get("id");
+
+  if (id) {
+    const docRef = doc(db, "activities", id);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      const activity = docSnap.data();
+      detailContainer.innerHTML = `
+        ${activity.photo ? `<img src="${activity.photo}" alt="Photo" style="max-width: 100%; border-radius: 12px;" />` : ""}
+        <h2>${activity.title}</h2>
+        ${activity.date ? `<p><strong>Date :</strong> ${activity.date}</p>` : ""}
+        ${activity.location ? `<p><strong>Lieu :</strong> ${activity.location}</p>` : ""}
+        ${activity.description ? `<p>${activity.description}</p>` : ""}
+        ${activity.tags ? `<p><strong>Tags :</strong> ${activity.tags}</p>` : ""}
+      `;
+    } else {
+      detailContainer.innerHTML = "<p>Activité introuvable.</p>";
+    }
+  }
 }
