@@ -1,87 +1,113 @@
+// Import Firebase (CDN moderne)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
 import {
   getFirestore,
   collection,
-  addDoc,
   getDocs,
-  serverTimestamp
+  addDoc,
+  doc,
+  getDoc
 } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
+// ✅ Ton bloc firebaseConfig
 const firebaseConfig = {
-  apiKey: "AIzaSyCZ7zsXf4yWALo7byJMCVNo_ySszFObeeY",
+  apiKey: "AIzaSyD0VtJgR-_4YxPCH8rXRMUAW1ULBz5W9n8",
   authDomain: "todolove-989f9.firebaseapp.com",
   projectId: "todolove-989f9",
   storageBucket: "todolove-989f9.appspot.com",
-  messagingSenderId: "851030512825",
-  appId: "1:851030512825:web:5b7a2ba992b363a7ab3768",
-  measurementId: "G-JBXFDQWTG4"
+  messagingSenderId: "655292268158",
+  appId: "1:655292268158:web:1dcacdf90d3ab9f8589010"
 };
 
+// ✅ Initialisation Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-const container = document.getElementById("cards-container");
-const form = document.getElementById("activity-form");
+// ✅ Fonction pour charger les activités
+async function loadActivities() {
+  const container = document.getElementById("cards-container");
+  if (!container) return;
 
-if (container) {
-  const loadActivities = async () => {
-    const querySnapshot = await getDocs(collection(db, "activities"));
-    if (querySnapshot.empty) {
-      container.innerHTML = "<p>Aucune activité enregistrée.</p>";
-      return;
-    }
+  const querySnapshot = await getDocs(collection(db, "activities"));
+  container.innerHTML = "";
 
-    querySnapshot.forEach((docSnap) => {
-      const act = docSnap.data();
-      const id = docSnap.id;
-
-      const card = document.createElement("div");
-      card.className = "card";
-      card.innerHTML = `
-        ${act.photo ? `<img src="${act.photo}" alt="Photo" />` : ""}
-        <div class="card-title">${act.title}</div>
-        ${act.location ? `<div class="card-location">📍 ${act.location}</div>` : ""}
-        ${act.date ? `<div class="card-date">📅 ${act.date}</div>` : ""}
-        <a href="detail.html?id=${id}" class="detail-link">Voir les détails</a>
-      `;
-      container.appendChild(card);
-    });
-  };
-
-  loadActivities();
+  querySnapshot.forEach((docSnap) => {
+    const activity = docSnap.data();
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      ${activity.photo ? `<img src="${activity.photo}" class="card-photo" />` : ""}
+      <h2>${activity.title}</h2>
+      ${activity.date ? `<p><strong>Date :</strong> ${activity.date}</p>` : ""}
+      ${activity.location ? `<p><strong>Lieu :</strong> ${activity.location}</p>` : ""}
+      <a href="detail.html?id=${docSnap.id}">Voir les détails</a>
+    `;
+    container.appendChild(card);
+  });
 }
 
+// ✅ Fonction pour ajouter une activité
+const form = document.getElementById("activity-form");
 if (form) {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const title = form.title.value;
-    const description = form.description.value;
-    const location = form.location.value;
-    const date = form.date.value;
-    const tags = form.tags.value;
-    const photoFile = form.photo.files[0];
+    const data = new FormData(form);
 
-    let photoURL = "";
-    if (photoFile) {
-      photoURL = URL.createObjectURL(photoFile); // temporaire (remplacer par Firebase Storage plus tard)
-    }
+    const activity = {
+      title: data.get("title"),
+      description: data.get("description"),
+      location: data.get("location"),
+      date: data.get("date"),
+      tags: data.get("tags"),
+      photo: ""
+    };
 
-    try {
-      await addDoc(collection(db, "activities"), {
-        title,
-        description,
-        location,
-        date,
-        tags,
-        photo: photoURL,
-        createdAt: serverTimestamp(),
-      });
-
-      alert("Activité ajoutée avec succès !");
+    const file = data.get("photo");
+    if (file && file.size > 0) {
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        activity.photo = reader.result;
+        await addDoc(collection(db, "activities"), activity);
+        window.location.href = "index.html";
+      };
+      reader.readAsDataURL(file);
+    } else {
+      await addDoc(collection(db, "activities"), activity);
       window.location.href = "index.html";
-    } catch (error) {
-      console.error("Erreur d'ajout :", error);
-      alert("Erreur lors de l'ajout de l'activité.");
     }
   });
 }
+
+// ✅ Détails de l'activité
+async function loadActivityDetail() {
+  const container = document.getElementById("detail-container");
+  if (!container) return;
+
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get("id");
+
+  const docRef = doc(db, "activities", id);
+  const docSnap = await getDoc(docRef);
+
+  if (!docSnap.exists()) {
+    container.innerHTML = "<p>Activité introuvable.</p>";
+    return;
+  }
+
+  const activity = docSnap.data();
+
+  container.innerHTML = `
+    ${activity.photo ? `<img src="${activity.photo}" alt="Photo" style="max-width: 100%; border-radius: 12px;" />` : ""}
+    <h2>${activity.title}</h2>
+    ${activity.date ? `<p><strong>Date :</strong> ${activity.date}</p>` : ""}
+    ${activity.location ? `<p><strong>Lieu :</strong> ${activity.location}</p>` : ""}
+    ${activity.description ? `<p>${activity.description}</p>` : ""}
+    ${activity.tags ? `<p><strong>Tags :</strong> ${activity.tags}</p>` : ""}
+  `;
+}
+
+// Exécution automatique
+window.addEventListener("DOMContentLoaded", () => {
+  loadActivities();
+  loadActivityDetail();
+});
