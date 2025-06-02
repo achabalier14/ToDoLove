@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>Nos souvenirs</title>
-  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/index.css" />
 </head>
 <body>
 
@@ -15,6 +15,18 @@
   </header>
 
   <main>
+    <section class="sort-section">
+      <label for="sortSelect">Trier par :</label>
+      <select id="sortSelect">
+        <option value="date_desc">📅 Date (récentes d'abord)</option>
+        <option value="date_asc">📅 Date (anciennes d'abord)</option>
+        <option value="ajout_desc">⏱️ Date d'ajout (récentes d'abord)</option>
+        <option value="ajout_asc">⏱️ Date d'ajout (anciennes d'abord)</option>
+        <option value="titre_asc">🔤 Titre (A → Z)</option>
+        <option value="titre_desc">🔤 Titre (Z → A)</option>
+      </select>
+    </section>
+
     <section class="cards-container" id="activitiesContainer">
       <p>Chargement...</p>
     </section>
@@ -29,9 +41,33 @@
     );
 
     const container = document.getElementById('activitiesContainer');
+    const sortSelect = document.getElementById('sortSelect');
 
-    async function loadActivities() {
-      const { data, error } = await supabase.from("activites").select("*").order("date", { ascending: false });
+    async function loadActivities(sortBy = 'date_desc') {
+      let query = supabase.from("activites").select("*");
+
+      switch (sortBy) {
+        case 'date_asc':
+          query = query.order("date", { ascending: true });
+          break;
+        case 'date_desc':
+          query = query.order("date", { ascending: false });
+          break;
+        case 'ajout_asc':
+          query = query.order("created_at", { ascending: true });
+          break;
+        case 'ajout_desc':
+          query = query.order("created_at", { ascending: false });
+          break;
+        case 'titre_asc':
+          query = query.order("titre", { ascending: true });
+          break;
+        case 'titre_desc':
+          query = query.order("titre", { ascending: false });
+          break;
+      }
+
+      const { data, error } = await query;
 
       if (error || !data || data.length === 0) {
         container.innerHTML = "<p class='empty-msg'>Aucune activité enregistrée.</p>";
@@ -55,6 +91,10 @@
         container.appendChild(card);
       });
     }
+
+    sortSelect.addEventListener("change", () => {
+      loadActivities(sortSelect.value);
+    });
 
     loadActivities();
   </script>

@@ -273,3 +273,34 @@ main {
     padding: 8px 12px;
   }
 }
+
+.sort-container {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.sort-container select {
+  padding: 10px;
+  font-size: 1rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  margin-top: 10px;
+}
+
+.sort-section {
+  max-width: 1000px;
+  margin: 10px auto 20px;
+  text-align: center;
+}
+
+.sort-section label {
+  font-weight: bold;
+  margin-right: 10px;
+}
+
+.sort-section select {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+}

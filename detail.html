@@ -3,19 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <title>Détails activité</title>
-  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/detail.css" />
 </head>
 <body>
 
   <header>
     <h1>Détails activité</h1>
-    <nav class="nav-buttons">
-      <a href="index.html" class="btn back">← Retour</a>
-    </nav>
   </header>
 
-  <main id="detailContent" class="detail-container">
+  <main class="container" id="detailContent">
     <p>Chargement...</p>
+    <a href="index.html" class="back-button">← Retour</a>
   </main>
 
   <script type="module">
@@ -48,15 +46,14 @@
       }
 
       detailContent.innerHTML = `
-        <article class="card detail-card fade-in">
+        <div class="container fade-in">
           ${data.image ? `<img src="${data.image}" alt="${data.titre}" loading="lazy" />` : ""}
-          <div class="card-content">
-            <h2>${data.titre}</h2>
-            <p><strong>Description :</strong> ${data.description || "Aucune description"}</p>
-            <p><strong>Lieu :</strong> ${data.lieu || "Non spécifié"}</p>
-            <p><strong>Date :</strong> ${data.date ? new Date(data.date).toLocaleDateString() : "Non spécifiée"}</p>
-          </div>
-        </article>
+          <h2>${data.titre}</h2>
+          <p class="info"><strong>Description :</strong> ${data.description || "Aucune description"}</p>
+          <p class="info"><strong>Lieu :</strong> ${data.lieu || "Non spécifié"}</p>
+          <p class="info"><strong>Date :</strong> ${data.date ? new Date(data.date).toLocaleDateString() : "Non spécifiée"}</p>
+          <a href="index.html" class="back-button">← Retour</a>
+        </div>
       `;
     }
 
