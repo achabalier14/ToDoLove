@@ -2,104 +2,68 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Détail de l'activité</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Détails activité</title>
   <style>
     body {
-      background: #fff0f5;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      margin: 0;
-      padding: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      padding: 20px;
     }
-
-    header {
-      background-color: #ff8fa3;
-      padding: 1em;
-      text-align: center;
-      color: white;
-    }
-
-    h1 {
-      margin: 0;
-      font-size: 1.6em;
-    }
-
-    .back-button {
-      display: inline-block;
-      margin-top: 0.5em;
-      background-color: #ff4d6d;
-      padding: 0.5em 1em;
-      color: white;
-      text-decoration: none;
-      border-radius: 12px;
-    }
-
-    main {
-      max-width: 600px;
-      margin: 2em auto;
+    .card {
       background: white;
-      padding: 2em;
+      max-width: 600px;
+      margin: auto;
+      padding: 20px;
       border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
-
-    img {
-      max-width: 100%;
-      border-radius: 12px;
-      margin-bottom: 1em;
+    .card img {
+      width: 100%;
+      max-height: 300px;
+      object-fit: cover;
+      border-radius: 10px;
+      margin-bottom: 20px;
     }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Détails de l'activité</h1>
-    <a href="index.html" class="back-button">⬅ Retour</a>
-  </header>
+  <div class="card" id="detailsContainer">
+    Chargement...
+  </div>
 
-  <main id="detail-container">
-    <!-- Détails de l'activité injectés dynamiquement -->
-  </main>
-
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyCZ7zsXf4yWALo7byJMCVNo_ySszFObeeY",
-      authDomain: "todolove-989f9.firebaseapp.com",
-      projectId: "todolove-989f9",
-      storageBucket: "todolove-989f9.appspot.com",
-      messagingSenderId: "851030512825",
-      appId: "1:851030512825:web:5b7a2ba992b363a7ab3768",
-      measurementId: "G-JBXFDQWTG4"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <script>
+    const supabaseUrl = 'https://jwbudzoqoiqzymxhifoo.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3YnVkem9xb2lxenlteGhpZm9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4NjI0NDksImV4cCI6MjA2NDQzODQ0OX0.p0uUr9KVWkUkS4MJS_EsT1ViygxnPrOCg-T0Xy91qh0';
+    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
     const params = new URLSearchParams(window.location.search);
-    const id = params.get("id");
-    const container = document.getElementById("detail-container");
+    const id = params.get('id');
 
-    async function loadActivity() {
-      const docRef = doc(db, "activities", id);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        container.innerHTML = 
-          ${data.photo ? <img src="${data.photo}" alt="Photo"> : ""}
-          <h2>${data.title}</h2>
-          <p><strong>Date :</strong> ${data.date}</p>
-          <p><strong>Lieu :</strong> ${data.location}</p>
-          <p><strong>Description :</strong> ${data.description}</p>
-          <p><strong>Tags :</strong> ${data.tags}</p>
-        ;
-      } else {
-        container.innerHTML = "<p>Activité introuvable.</p>";
+    async function loadDetails() {
+      const { data, error } = await supabase
+        .from('activites')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      const container = document.getElementById('detailsContainer');
+      if (error || !data) {
+        container.innerHTML = 'Erreur de chargement des détails.';
+        return;
       }
+
+      container.innerHTML = `
+        ${data.image ? `<img src="${data.image}" alt="Image">` : ''}
+        <h2>${data.titre}</h2>
+        <p><strong>Description :</strong> ${data.description || 'Aucune'}</p>
+        <p><strong>Lieu :</strong> ${data.lieu || 'Non précisé'}</p>
+        <p><strong>Date :</strong> ${data.date || 'Non précisée'}</p>
+      `;
     }
 
-    loadActivity();
+    loadDetails();
   </script>
 </body>
 </html>

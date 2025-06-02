@@ -1,115 +1,67 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
   <title>Ajouter une activité</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      background-color: #fefefe;
-    }
-    h1 {
-      text-align: center;
-    }
-    form {
-      max-width: 500px;
-      margin: auto;
-      background: #fff;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-    input, textarea, button {
-      width: 100%;
-      padding: 10px;
-      margin-top: 10px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      box-sizing: border-box;
-    }
-    button {
-      background-color: #ff6b81;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #ff4757;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <h1>Ajouter une activité</h1>
   <form id="activityForm">
-    <input type="text" id="title" placeholder="Titre (obligatoire)" required />
-    <textarea id="description" placeholder="Description (optionnel)"></textarea>
-    <input type="text" id="location" placeholder="Lieu (optionnel)" />
-    <input type="date" id="date" />
-    <input type="file" id="photo" accept="image/*" />
+    <input type="text" id="titre" placeholder="Titre" required><br>
+    <textarea id="description" placeholder="Description"></textarea><br>
+    <input type="text" id="lieu" placeholder="Lieu"><br>
+    <input type="date" id="date"><br>
+    <input type="file" id="image"><br>
     <button type="submit">Ajouter</button>
   </form>
 
-  <!-- Firebase CDN (compat) -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-storage-compat.js"></script>
+  <!-- ✅ Le script est maintenant un module -->
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyCZ7zsXf4yWALo7byJMCVNo_ySszFObeeY",
-      authDomain: "todolove-989f9.firebaseapp.com",
-      projectId: "todolove-989f9",
-      storageBucket: "todolove-989f9.appspot.com",
-      messagingSenderId: "851030512825",
-      appId: "1:851030512825:web:5b7a2ba992b363a7ab3768",
-      measurementId: "G-JBXFDQWTG4"
-    };
+    const supabase = createClient(
+      'https://jwbudzoqoiqzymxhifoo.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3YnVkem9xb2lxenlteGhpZm9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4NjI0NDksImV4cCI6MjA2NDQzODQ0OX0.p0uUr9KVWkUkS4MJS_EsT1ViygxnPrOCg-T0Xy91qh0'
+    );
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-    const storage = firebase.storage();
-
-    const form = document.getElementById('activityForm');
-
-    form.addEventListener('submit', async (e) => {
+    document.getElementById('activityForm').addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      const title = document.getElementById('title').value.trim();
-      const description = document.getElementById('description').value.trim();
-      const location = document.getElementById('location').value.trim();
-      const date = document.getElementById('date').value;
-      const photoFile = document.getElementById('photo').files[0];
+      const titre = document.getElementById('titre').value;
+      const description = document.getElementById('description').value;
+      const lieu = document.getElementById('lieu').value;
+      const dateInput = document.getElementById('date').value;
+      const imageFile = document.getElementById('image').files[0];
 
-      if (!title) {
-        alert("Le titre est obligatoire.");
-        return;
-      }
+      const date = dateInput === "" ? null : dateInput;
+      let imageUrl = null;
 
-      try {
-        let photoURL = "";
+      if (imageFile) {
+        const fileName = `${Date.now()}_${imageFile.name}`;
+        const { error: uploadError } = await supabase.storage
+          .from('images')
+          .upload(fileName, imageFile);
 
-        if (photoFile) {
-          const storageRef = storage.ref().child('photos/' + Date.now() + "_" + photoFile.name);
-          await storageRef.put(photoFile);
-          photoURL = await storageRef.getDownloadURL();
+        if (uploadError) {
+          alert("Erreur upload image : " + uploadError.message);
+          return;
         }
 
-        await db.collection('activities').add({
-          title,
-          description,
-          location,
-          date,
-          photoURL,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
+        imageUrl = `https://jwbudzoqoiqzymxhifoo.supabase.co/storage/v1/object/public/images/${fileName}`;
+      }
 
-        alert("Activité ajoutée avec succès !");
-        form.reset();
-      } catch (error) {
-        console.error("Erreur lors de l'ajout :", error);
-        alert("Une erreur est survenue.");
+      const { error } = await supabase
+        .from('activites')
+        .insert([
+          { titre, description, lieu, date, image: imageUrl }
+        ]);
+
+      if (error) {
+        alert("Erreur ajout activité : " + error.message);
+      } else {
+        alert("Activité ajoutée !");
+        window.location.href = 'index.html';
       }
     });
   </script>

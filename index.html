@@ -1,21 +1,98 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Nos activités ❤️</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <title>Nos souvenirs</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .card {
+      border: 1px solid #ccc;
+      border-radius: 12px;
+      padding: 16px;
+      margin: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      max-width: 300px;
+    }
+    .card img {
+      max-width: 100%;
+      border-radius: 8px;
+    }
+    .card h2 {
+      font-size: 1.2em;
+      margin: 0.5em 0;
+    }
+    .card button {
+      background-color: #007bff;
+      color: white;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .cards-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+  </style>
 </head>
 <body>
-  <header>
-    <h1>Nos activités ❤️</h1>
-    <a href="add.html" class="add-button">+ Ajouter</a>
-  </header>
+  <h1>Nos souvenirs</h1>
+  <div class="cards-container" id="activitiesContainer"></div>
 
-  <main id="cards-container">
-    <!-- Les cartes seront générées dynamiquement ici -->
-  </main>
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-  <script type="module" src="script.js"></script>
+    const supabase = createClient(
+      'https://jwbudzoqoiqzymxhifoo.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3YnVkem9xb2lxenlteGhpZm9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4NjI0NDksImV4cCI6MjA2NDQzODQ0OX0.p0uUr9KVWkUkS4MJS_EsT1ViygxnPrOCg-T0Xy91qh0'
+    );
+
+    const container = document.getElementById('activitiesContainer');
+
+    async function fetchActivities() {
+      const { data, error } = await supabase
+        .from('activites')
+        .select('*')
+        .order('date', { ascending: false });
+
+      if (error) {
+        container.innerHTML = `<p>Erreur lors du chargement : ${error.message}</p>`;
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        container.innerHTML = `<p>Aucune activité enregistrée.</p>`;
+        return;
+      }
+
+      data.forEach(act => {
+        const card = document.createElement('div');
+        card.className = 'card';
+
+        if (act.image) {
+          const img = document.createElement('img');
+          img.src = act.image;
+          img.alt = act.titre;
+          card.appendChild(img);
+        }
+
+        const title = document.createElement('h2');
+        title.textContent = act.titre;
+        card.appendChild(title);
+
+        const button = document.createElement('button');
+        button.textContent = 'Voir plus';
+        button.onclick = () => {
+          window.location.href = `detail.html?id=${act.id}`;
+        };
+        card.appendChild(button);
+
+        container.appendChild(card);
+      });
+    }
+
+    fetchActivities();
+  </script>
 </body>
 </html>
