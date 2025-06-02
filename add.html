@@ -8,8 +8,8 @@
     body {
       font-family: Arial, sans-serif;
       background: #ffe4ec;
-      padding: 0;
       margin: 0;
+      padding: 0;
     }
     header {
       background-color: #ff8fa3;
@@ -100,7 +100,62 @@
       apiKey: "AIzaSyCZ7zsXf4yWALo7byJMCVNo_ySszFObeeY",
       authDomain: "todolove-989f9.firebaseapp.com",
       projectId: "todolove-989f9",
-      storageBucket: "todolove-989f9.appspot.com",
+      storageBucket: "todolove-989f9.appspot.com", // correction ici
       messagingSenderId: "851030512825",
       appId: "1:851030512825:web:5b7a2ba992b363a7ab3768",
       measurementId: "G-JBXFDQWTG4"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+
+    const form = document.getElementById("activity-form");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const title = form.title.value.trim();
+      const description = form.description.value.trim();
+      const location = form.location.value.trim();
+      const date = form.date.value;
+      const tags = form.tags.value.trim();
+      const photoFile = form.photo.files[0];
+
+      let photoURL = "";
+
+      try {
+        console.log("🟡 Envoi en cours...");
+
+        // 1. Si une image est présente, on l’upload d’abord
+        if (photoFile) {
+          const imageRef = ref(storage, `activities/${Date.now()}_${photoFile.name}`);
+          const snapshot = await uploadBytes(imageRef, photoFile);
+          photoURL = await getDownloadURL(snapshot.ref);
+          console.log("✅ Image uploadée :", photoURL);
+        }
+
+        // 2. Ajout des données dans Firestore
+        const docRef = await addDoc(collection(db, "activities"), {
+          title,
+          description,
+          location,
+          date,
+          tags,
+          photo: photoURL,
+          createdAt: new Date()
+        });
+
+        console.log("✅ Activité ajoutée avec ID :", docRef.id);
+
+        // 3. Redirection
+        window.location.href = "index.html";
+
+      } catch (error) {
+        console.error("❌ Erreur détectée :", error);
+        alert("Une erreur est survenue : " + error.message);
+      }
+    });
+  </script>
+</body>
+</html>
