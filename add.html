@@ -32,6 +32,7 @@
       <input type="file" id="image" name="image" accept="image/*" />
 
       <button type="submit" class="btn primary">Enregistrer</button>
+      <p id="formMessage" class="form-message"></p>
     </form>
   </main>
 
@@ -44,49 +45,66 @@
     );
 
     const form = document.getElementById('activityForm');
+    const messageEl = document.getElementById('formMessage');
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      const titre = form.titre.value.trim();
-      const description = form.description.value.trim();
-      const lieu = form.lieu.value.trim();
-      const date = form.date.value ? form.date.value : null;
-      const imageFile = form.image.files[0];
+      messageEl.textContent = '';
+      messageEl.className = 'form-message';
 
-      let imageUrl = null;
+      const titre = document.getElementById('titre').value.trim();
+      const description = document.getElementById('description').value.trim();
+      const lieu = document.getElementById('lieu').value.trim();
+      const date = document.getElementById('date').value;
+      const imageFile = document.getElementById('image').files[0];
+
+      if (!titre) {
+        messageEl.textContent = "Le titre est obligatoire.";
+        messageEl.classList.add('error');
+        return;
+      }
+
+      let imageURL = null;
 
       if (imageFile) {
-        const fileName = `${Date.now()}_${imageFile.name}`;
-        const { data: imageData, error: imageError } = await supabase.storage
+        const fileName = `${Date.now()}-${imageFile.name}`;
+        const { data, error: uploadError } = await supabase.storage
           .from('images')
           .upload(fileName, imageFile);
 
-        if (imageError) {
-          console.error('Erreur lors de l\'upload de l\'image :', imageError.message);
+        if (uploadError) {
+          console.error(uploadError);
+          messageEl.textContent = "Erreur lors de l'envoi de l'image.";
+          messageEl.classList.add('error');
           return;
         }
 
-        const { data: publicUrlData } = supabase.storage
+        const { data: publicURL } = supabase.storage
           .from('images')
           .getPublicUrl(fileName);
-        
-        imageUrl = publicUrlData.publicUrl;
+
+        imageURL = publicURL.publicUrl;
       }
 
-      const { data, error } = await supabase
-        .from('activites')
-        .insert([{ titre, description, lieu, date, image: imageUrl }]);
+      const { error } = await supabase.from('activites').insert([{
+        titre,
+        description,
+        lieu,
+        date: date || null,
+        image: imageURL
+      }]);
 
       if (error) {
-        console.error("Erreur lors de l'enregistrement de l'activité :", error.message);
-        alert("Erreur lors de l'enregistrement de l'activité.");
+        console.error('Erreur :', error.message);
+        messageEl.textContent = "Erreur lors de l'enregistrement de l'activité.";
+        messageEl.classList.add('error');
       } else {
-        alert("Activité enregistrée !");
-        window.location.href = "index.html";
+        messageEl.textContent = "Activité enregistrée avec succès !";
+        messageEl.classList.add('success');
+        form.reset();
       }
     });
   </script>
-
 </body>
 </html>
