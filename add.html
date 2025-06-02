@@ -143,12 +143,15 @@
       let photoURL = "";
 
       try {
+        // Si une photo est sélectionnée, on l’upload
         if (photoFile) {
-          const photoRef = storageRef(storage, 'activities/' + Date.now() + '_' + photoFile.name);
-          const snapshot = await uploadBytes(photoRef, photoFile);
-          photoURL = await getDownloadURL(snapshot.ref);
+          const fileName = Date.now() + "_" + photoFile.name;
+          const imgRef = storageRef(storage, "activities/" + fileName);
+          const uploadSnapshot = await uploadBytes(imgRef, photoFile);
+          photoURL = await getDownloadURL(uploadSnapshot.ref);
         }
 
+        // Ajout à Firestore
         await addDoc(collection(db, "activities"), {
           title,
           description,
@@ -158,10 +161,11 @@
           photo: photoURL
         });
 
+        // Redirection
         window.location.href = "index.html";
-      } catch (err) {
-        alert("Erreur : " + err.message);
-        console.error("Erreur lors de l'ajout :", err);
+      } catch (error) {
+        console.error("Erreur lors de l'ajout :", error);
+        alert("Erreur lors de l'ajout : " + error.message);
       }
     });
   </script>
