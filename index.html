@@ -1,47 +1,108 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Nos souvenirs</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
   <style>
-    .card {
-      border: 1px solid #ccc;
-      border-radius: 12px;
-      padding: 16px;
-      margin: 10px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      max-width: 300px;
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f9f9f9;
+      margin: 0;
+      padding: 20px;
     }
-    .card img {
-      max-width: 100%;
-      border-radius: 8px;
+
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 30px;
     }
-    .card h2 {
-      font-size: 1.2em;
-      margin: 0.5em 0;
-    }
-    .card button {
-      background-color: #007bff;
-      color: white;
-      padding: 8px 12px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-    .cards-container {
+
+    .top-bar {
       display: flex;
-      flex-wrap: wrap;
       justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .top-bar a {
+      background-color: #ff7e7e;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: bold;
+      transition: background 0.3s;
+    }
+
+    .top-bar a:hover {
+      background-color: #ff4d4d;
+    }
+
+    .cards-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      overflow: hidden;
+      transition: transform 0.2s;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+    }
+
+    .card img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+    }
+
+    .card-content {
+      padding: 15px;
+    }
+
+    .card h2 {
+      font-size: 18px;
+      margin: 0 0 10px;
+      color: #444;
+    }
+
+    .card button {
+      background-color: #ff7e7e;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .card button:hover {
+      background-color: #ff4d4d;
     }
   </style>
 </head>
 <body>
+
   <h1>Nos souvenirs</h1>
-  <div class="cards-container" id="activitiesContainer"></div>
+
+  <div class="top-bar">
+    <a href="add.html">➕ Créer une activité</a>
+  </div>
+
+  <div class="cards-container" id="activitiesContainer">
+    <p>Chargement...</p>
+  </div>
 
   <script type="module">
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
     const supabase = createClient(
       'https://jwbudzoqoiqzymxhifoo.supabase.co',
@@ -50,49 +111,33 @@
 
     const container = document.getElementById('activitiesContainer');
 
-    async function fetchActivities() {
-      const { data, error } = await supabase
-        .from('activites')
-        .select('*')
-        .order('date', { ascending: false });
+    async function loadActivities() {
+      const { data, error } = await supabase.from("activites").select("*").order("date", { ascending: false });
 
-      if (error) {
-        container.innerHTML = `<p>Erreur lors du chargement : ${error.message}</p>`;
+      if (error || !data || data.length === 0) {
+        container.innerHTML = "<p>Aucune activité enregistrée.</p>";
         return;
       }
 
-      if (!data || data.length === 0) {
-        container.innerHTML = `<p>Aucune activité enregistrée.</p>`;
-        return;
-      }
+      container.innerHTML = "";
 
-      data.forEach(act => {
-        const card = document.createElement('div');
-        card.className = 'card';
+      data.forEach(activity => {
+        const card = document.createElement("div");
+        card.className = "card";
 
-        if (act.image) {
-          const img = document.createElement('img');
-          img.src = act.image;
-          img.alt = act.titre;
-          card.appendChild(img);
-        }
-
-        const title = document.createElement('h2');
-        title.textContent = act.titre;
-        card.appendChild(title);
-
-        const button = document.createElement('button');
-        button.textContent = 'Voir plus';
-        button.onclick = () => {
-          window.location.href = `detail.html?id=${act.id}`;
-        };
-        card.appendChild(button);
+        card.innerHTML = `
+          ${activity.image ? `<img src="${activity.image}" alt="${activity.titre}" />` : ""}
+          <div class="card-content">
+            <h2>${activity.titre}</h2>
+            <button onclick="location.href='detail.html?id=${activity.id}'">Voir plus</button>
+          </div>
+        `;
 
         container.appendChild(card);
       });
     }
 
-    fetchActivities();
+    loadActivities();
   </script>
 </body>
 </html>

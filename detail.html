@@ -2,68 +2,75 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Détails activité</title>
+  <title>Détail de l'activité</title>
+  <link rel="stylesheet" href="style.css" />
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f4f4;
-      padding: 20px;
-    }
-    .card {
-      background: white;
+    .container {
       max-width: 600px;
-      margin: auto;
+      margin: 30px auto;
       padding: 20px;
+      border: 1px solid #ccc;
       border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
-    .card img {
-      width: 100%;
-      max-height: 300px;
-      object-fit: cover;
-      border-radius: 10px;
-      margin-bottom: 20px;
+    img {
+      max-width: 100%;
+      border-radius: 8px;
+      margin-bottom: 1em;
+    }
+    h1 {
+      margin-bottom: 0.5em;
+    }
+    p {
+      margin: 0.5em 0;
     }
   </style>
 </head>
 <body>
-  <div class="card" id="detailsContainer">
-    Chargement...
+  <div class="container" id="activityDetail">
+    <p>Chargement...</p>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-  <script>
-    const supabaseUrl = 'https://jwbudzoqoiqzymxhifoo.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3YnVkem9xb2lxenlteGhpZm9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4NjI0NDksImV4cCI6MjA2NDQzODQ0OX0.p0uUr9KVWkUkS4MJS_EsT1ViygxnPrOCg-T0Xy91qh0';
-    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+    const supabase = createClient(
+      'https://jwbudzoqoiqzymxhifoo.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3YnVkem9xb2lxenlteGhpZm9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4NjI0NDksImV4cCI6MjA2NDQzODQ0OX0.p0uUr9KVWkUkS4MJS_EsT1ViygxnPrOCg-T0Xy91qh0'
+    );
+
+    const container = document.getElementById('activityDetail');
 
     const params = new URLSearchParams(window.location.search);
-    const id = params.get('id');
+    const id = params.get("id");
 
-    async function loadDetails() {
+    async function loadActivity() {
+      if (!id) {
+        container.innerHTML = "<p>Aucune activité trouvée.</p>";
+        return;
+      }
+
       const { data, error } = await supabase
-        .from('activites')
-        .select('*')
-        .eq('id', id)
+        .from("activites")
+        .select("*")
+        .eq("id", id)
         .single();
 
-      const container = document.getElementById('detailsContainer');
       if (error || !data) {
-        container.innerHTML = 'Erreur de chargement des détails.';
+        container.innerHTML = `<p>Erreur lors du chargement : ${error?.message || "activité non trouvée"}</p>`;
         return;
       }
 
       container.innerHTML = `
-        ${data.image ? `<img src="${data.image}" alt="Image">` : ''}
-        <h2>${data.titre}</h2>
-        <p><strong>Description :</strong> ${data.description || 'Aucune'}</p>
-        <p><strong>Lieu :</strong> ${data.lieu || 'Non précisé'}</p>
-        <p><strong>Date :</strong> ${data.date || 'Non précisée'}</p>
+        ${data.image ? `<img src="${data.image}" alt="${data.titre}" />` : ""}
+        <h1>${data.titre}</h1>
+        ${data.description ? `<p><strong>Description :</strong> ${data.description}</p>` : ""}
+        ${data.lieu ? `<p><strong>Lieu :</strong> ${data.lieu}</p>` : ""}
+        ${data.date ? `<p><strong>Date :</strong> ${new Date(data.date).toLocaleDateString()}</p>` : ""}
       `;
     }
 
-    loadDetails();
+    loadActivity();
   </script>
 </body>
 </html>
