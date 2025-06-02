@@ -1,0 +1,158 @@
+/*  add.css  */
+
+/* Reset rapide */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Corps de la page */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #f0f4ff 0%, #d9e4ff 100%);
+  color: #333;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+/* En-tête */
+header {
+  width: 100%;
+  max-width: 600px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+header h1 {
+  font-size: 1.8rem;
+  color: #1f3c88;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Bouton Retour */
+.nav-buttons .btn.back {
+  background-color: #ff7e7e;
+  color: white;
+  padding: 10px 18px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.nav-buttons .btn.back:hover {
+  background-color: #ff4d4d;
+  transform: translateY(-2px);
+}
+
+/* Formulaire */
+.form-container {
+  width: 100%;
+  max-width: 600px;
+  background: white;
+  border-radius: 12px;
+  padding: 30px 25px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  animation: fadeIn 0.8s ease-out;
+}
+
+/* Labels */
+.form-container label {
+  display: block;
+  margin-top: 15px;
+  font-weight: 600;
+  color: #1f3c88;
+  font-size: 0.95rem;
+}
+
+/* Champs de saisie */
+.form-container input[type="text"],
+.form-container input[type="date"],
+.form-container textarea,
+.form-container input[type="file"] {
+  width: 100%;
+  padding: 12px 14px;
+  margin-top: 6px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  font-family: inherit;
+}
+
+.form-container textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* Focus */
+.form-container input:focus,
+.form-container textarea:focus,
+.form-container input[type="file"]:focus {
+  outline: none;
+  border-color: #1f3c88;
+  box-shadow: 0 0 8px rgba(31, 60, 136, 0.2);
+}
+
+/* Bouton Enregistrer */
+.form-container .btn.primary {
+  width: 100%;
+  display: block;
+  padding: 12px;
+  margin-top: 20px;
+  background-color: #1f3c88;
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 6px 12px rgba(31, 60, 136, 0.2);
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.form-container .btn.primary:hover {
+  background-color: #12265b;
+  transform: translateY(-2px);
+}
+
+/* Message d'erreur ou de succès */
+#message {
+  text-align: center;
+  margin-top: 12px;
+  font-size: 0.95rem;
+  color: #d32f2f; /* couleur rouge pour erreur */
+}
+
+/* Animation fadeIn */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Responsive */
+@media (max-width: 500px) {
+  header h1 {
+    font-size: 1.4rem;
+  }
+  .form-container {
+    padding: 20px 15px;
+  }
+  .form-container label,
+  .form-container .btn.primary {
+    font-size: 0.9rem;
+  }
+}

@@ -2,34 +2,21 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <title>Détail de l'activité</title>
-  <link rel="stylesheet" href="style.css" />
-  <style>
-    .container {
-      max-width: 600px;
-      margin: 30px auto;
-      padding: 20px;
-      border: 1px solid #ccc;
-      border-radius: 12px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    }
-    img {
-      max-width: 100%;
-      border-radius: 8px;
-      margin-bottom: 1em;
-    }
-    h1 {
-      margin-bottom: 0.5em;
-    }
-    p {
-      margin: 0.5em 0;
-    }
-  </style>
+  <title>Détails activité</title>
+  <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-  <div class="container" id="activityDetail">
+
+  <header>
+    <h1>Détails activité</h1>
+    <nav class="nav-buttons">
+      <a href="index.html" class="btn back">← Retour</a>
+    </nav>
+  </header>
+
+  <main id="detailContent" class="detail-container">
     <p>Chargement...</p>
-  </div>
+  </main>
 
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
@@ -39,38 +26,41 @@
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3YnVkem9xb2lxenlteGhpZm9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4NjI0NDksImV4cCI6MjA2NDQzODQ0OX0.p0uUr9KVWkUkS4MJS_EsT1ViygxnPrOCg-T0Xy91qh0'
     );
 
-    const container = document.getElementById('activityDetail');
+    const detailContent = document.getElementById("detailContent");
 
-    const params = new URLSearchParams(window.location.search);
-    const id = params.get("id");
+    function getParam(param) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(param);
+    }
 
-    async function loadActivity() {
+    async function loadDetail() {
+      const id = getParam("id");
       if (!id) {
-        container.innerHTML = "<p>Aucune activité trouvée.</p>";
+        detailContent.innerHTML = "<p>Erreur : Identifiant manquant.</p>";
         return;
       }
 
-      const { data, error } = await supabase
-        .from("activites")
-        .select("*")
-        .eq("id", id)
-        .single();
+      const { data, error } = await supabase.from("activites").select("*").eq("id", id).single();
 
       if (error || !data) {
-        container.innerHTML = `<p>Erreur lors du chargement : ${error?.message || "activité non trouvée"}</p>`;
+        detailContent.innerHTML = "<p>Activité non trouvée.</p>";
         return;
       }
 
-      container.innerHTML = `
-        ${data.image ? `<img src="${data.image}" alt="${data.titre}" />` : ""}
-        <h1>${data.titre}</h1>
-        ${data.description ? `<p><strong>Description :</strong> ${data.description}</p>` : ""}
-        ${data.lieu ? `<p><strong>Lieu :</strong> ${data.lieu}</p>` : ""}
-        ${data.date ? `<p><strong>Date :</strong> ${new Date(data.date).toLocaleDateString()}</p>` : ""}
+      detailContent.innerHTML = `
+        <article class="card detail-card fade-in">
+          ${data.image ? `<img src="${data.image}" alt="${data.titre}" loading="lazy" />` : ""}
+          <div class="card-content">
+            <h2>${data.titre}</h2>
+            <p><strong>Description :</strong> ${data.description || "Aucune description"}</p>
+            <p><strong>Lieu :</strong> ${data.lieu || "Non spécifié"}</p>
+            <p><strong>Date :</strong> ${data.date ? new Date(data.date).toLocaleDateString() : "Non spécifiée"}</p>
+          </div>
+        </article>
       `;
     }
 
-    loadActivity();
+    loadDetail();
   </script>
 </body>
 </html>

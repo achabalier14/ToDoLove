@@ -1,22 +1,40 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <title>Ajouter une activité</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <title>Créer une activité</title>
+  <link rel="stylesheet" href="css/add.css" />
 </head>
 <body>
-  <h1>Ajouter une activité</h1>
-  <form id="activityForm">
-    <input type="text" id="titre" placeholder="Titre" required><br>
-    <textarea id="description" placeholder="Description"></textarea><br>
-    <input type="text" id="lieu" placeholder="Lieu"><br>
-    <input type="date" id="date"><br>
-    <input type="file" id="image"><br>
-    <button type="submit">Ajouter</button>
-  </form>
 
-  <!-- ✅ Le script est maintenant un module -->
+  <header>
+    <h1>Créer une activité</h1>
+    <nav class="nav-buttons">
+      <a href="index.html" class="btn back">← Retour</a>
+    </nav>
+  </header>
+
+  <main>
+    <form id="activityForm" class="form-container">
+      <label for="titre">Titre *</label>
+      <input type="text" id="titre" name="titre" required placeholder="Nom de l'activité" />
+
+      <label for="description">Description</label>
+      <textarea id="description" name="description" rows="4" placeholder="Décrivez votre activité..."></textarea>
+
+      <label for="lieu">Lieu</label>
+      <input type="text" id="lieu" name="lieu" placeholder="Où ?" />
+
+      <label for="date">Date</label>
+      <input type="date" id="date" name="date" />
+
+      <label for="image">Photo</label>
+      <input type="file" id="image" name="image" accept="image/*" />
+
+      <button type="submit" class="btn primary">Enregistrer</button>
+    </form>
+  </main>
+
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
@@ -25,45 +43,50 @@
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3YnVkem9xb2lxenlteGhpZm9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4NjI0NDksImV4cCI6MjA2NDQzODQ0OX0.p0uUr9KVWkUkS4MJS_EsT1ViygxnPrOCg-T0Xy91qh0'
     );
 
-    document.getElementById('activityForm').addEventListener('submit', async (e) => {
+    const form = document.getElementById('activityForm');
+
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      const titre = document.getElementById('titre').value;
-      const description = document.getElementById('description').value;
-      const lieu = document.getElementById('lieu').value;
-      const dateInput = document.getElementById('date').value;
-      const imageFile = document.getElementById('image').files[0];
+      const titre = form.titre.value.trim();
+      const description = form.description.value.trim();
+      const lieu = form.lieu.value.trim();
+      const date = form.date.value ? form.date.value : null;
+      const imageFile = form.image.files[0];
 
-      const date = dateInput === "" ? null : dateInput;
       let imageUrl = null;
 
       if (imageFile) {
         const fileName = `${Date.now()}_${imageFile.name}`;
-        const { error: uploadError } = await supabase.storage
+        const { data: imageData, error: imageError } = await supabase.storage
           .from('images')
           .upload(fileName, imageFile);
 
-        if (uploadError) {
-          alert("Erreur upload image : " + uploadError.message);
+        if (imageError) {
+          console.error('Erreur lors de l\'upload de l\'image :', imageError.message);
           return;
         }
 
-        imageUrl = `https://jwbudzoqoiqzymxhifoo.supabase.co/storage/v1/object/public/images/${fileName}`;
+        const { data: publicUrlData } = supabase.storage
+          .from('images')
+          .getPublicUrl(fileName);
+        
+        imageUrl = publicUrlData.publicUrl;
       }
 
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('activites')
-        .insert([
-          { titre, description, lieu, date, image: imageUrl }
-        ]);
+        .insert([{ titre, description, lieu, date, image: imageUrl }]);
 
       if (error) {
-        alert("Erreur ajout activité : " + error.message);
+        console.error("Erreur lors de l'enregistrement de l'activité :", error.message);
+        alert("Erreur lors de l'enregistrement de l'activité.");
       } else {
-        alert("Activité ajoutée !");
-        window.location.href = 'index.html';
+        alert("Activité enregistrée !");
+        window.location.href = "index.html";
       }
     });
   </script>
+
 </body>
 </html>
