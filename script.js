@@ -1,19 +1,21 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+// script.js
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
   getFirestore,
   collection,
   addDoc,
   getDocs,
-  doc,
-  getDoc
-} from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+  getDoc,
+  doc
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import {
   getStorage,
   ref,
   uploadBytes,
   getDownloadURL
-} from "https://www.gstatic.com/firebasejs/10.11.0/firebase-storage.js";
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
+// Configuration Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyCZ7zsXf4yWALo7byJMCVNo_ySszFObeeY",
   authDomain: "todolove-989f9.firebaseapp.com",
@@ -24,9 +26,55 @@ const firebaseConfig = {
   measurementId: "G-JBXFDQWTG4"
 };
 
+// Initialisation Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const storage = getStorage(app);
+
+// Gestion du formulaire d'ajout (add.html)
+const form = document.getElementById("activity-form");
+if (form) {
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const title = document.querySelector('input[name="title"]').value.trim();
+    const description = document.querySelector('textarea[name="description"]').value.trim();
+    const location = document.querySelector('input[name="location"]').value.trim();
+    const date = document.querySelector('input[name="date"]').value;
+    const tags = document.querySelector('input[name="tags"]').value.trim();
+    const photoFile = document.querySelector('input[name="photo"]').files[0];
+
+    if (!title) {
+      alert("Le titre est obligatoire.");
+      return;
+    }
+
+    try {
+      let photoURL = "";
+
+      if (photoFile) {
+        const photoRef = ref(storage, 'activities/' + Date.now() + "_" + photoFile.name);
+        const snapshot = await uploadBytes(photoRef, photoFile);
+        photoURL = await getDownloadURL(snapshot.ref);
+      }
+
+      await addDoc(collection(db, "activities"), {
+        title,
+        description,
+        location,
+        date,
+        tags,
+        photo: photoURL
+      });
+
+      alert("Activité ajoutée !");
+      window.location.href = "index.html";
+    } catch (error) {
+      console.error("Erreur lors de l'ajout de l'activité :", error);
+      alert("Erreur : " + error.message);
+    }
+  });
+}
 
 // PAGE D'AJOUT
 const form = document.getElementById("activity-form");
@@ -34,35 +82,45 @@ if (form) {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const data = new FormData(form);
-    const title = data.get("title");
-    const description = data.get("description");
-    const location = data.get("location");
-    const date = data.get("date");
-    const tags = data.get("tags");
-    const photoFile = data.get("photo");
+    const title = document.querySelector('input[name="title"]').value.trim();
+    const description = document.querySelector('textarea[name="description"]').value.trim();
+    const location = document.querySelector('input[name="location"]').value.trim();
+    const date = document.querySelector('input[name="date"]').value;
+    const tags = document.querySelector('input[name="tags"]').value.trim();
+    const photoFile = document.querySelector('input[name="photo"]').files[0];
 
-    let photoURL = "";
-    if (photoFile && photoFile.size > 0) {
-      const storageRef = ref(storage, 'activities/' + Date.now() + '_' + photoFile.name);
-      const snapshot = await uploadBytes(storageRef, photoFile);
-      photoURL = await getDownloadURL(snapshot.ref);
+    if (!title) {
+      alert("Le titre est obligatoire.");
+      return;
     }
 
-    await addDoc(collection(db, "activities"), {
-      title,
-      description,
-      location,
-      date,
-      tags,
-      photo: photoURL
-    });
+    let photoURL = "";
 
-    window.location.href = "index.html";
+    try {
+      if (photoFile) {
+        const storageRef = ref(storage, 'activities/' + Date.now() + '_' + photoFile.name);
+        const snapshot = await uploadBytes(storageRef, photoFile);
+        photoURL = await getDownloadURL(snapshot.ref);
+      }
+
+      await addDoc(collection(db, "activities"), {
+        title,
+        description,
+        location,
+        date,
+        tags,
+        photo: photoURL
+      });
+
+      window.location.href = "index.html";
+    } catch (error) {
+      console.error("Erreur lors de l'ajout :", error);
+      alert("Une erreur est survenue : " + error.message);
+    }
   });
 }
 
-// PAGE D'ACCUEIL : index.html
+// PAGE D'ACCUEIL
 const container = document.getElementById("cards-container");
 if (container) {
   const querySnapshot = await getDocs(collection(db, "activities"));
@@ -81,7 +139,7 @@ if (container) {
   });
 }
 
-// PAGE DE DÉTAIL : detail.html
+// PAGE DE DÉTAIL
 const detailContainer = document.getElementById("detail-container");
 if (detailContainer) {
   const params = new URLSearchParams(window.location.search);

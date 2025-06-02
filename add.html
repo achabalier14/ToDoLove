@@ -2,119 +2,61 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Ajouter une activité</title>
   <style>
     body {
-      background: linear-gradient(to bottom right, #ffe4ec, #ffffff);
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      padding: 0;
-      margin: 0;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #fefefe;
     }
-
-    header {
-      background-color: #ff8fa3;
-      padding: 1em;
-      text-align: center;
-      color: white;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    }
-
     h1 {
-      margin: 0;
-      font-size: 1.8em;
+      text-align: center;
     }
-
-    .back-button {
-      display: inline-block;
-      margin-top: 0.5em;
-      background-color: #ff4d6d;
-      padding: 0.5em 1em;
-      color: white;
-      text-decoration: none;
-      border-radius: 12px;
-      font-weight: bold;
-    }
-
-    main {
+    form {
       max-width: 500px;
-      margin: 2em auto;
-      background: white;
-      padding: 2em;
-      border-radius: 16px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
-
-    form label {
-      font-weight: 600;
-      margin-top: 1em;
-      display: block;
-      color: #333;
-    }
-
-    form input,
-    form textarea {
+    input, textarea, button {
       width: 100%;
-      padding: 0.8em;
-      margin-top: 0.3em;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 6px;
       border: 1px solid #ccc;
-      border-radius: 10px;
-      font-size: 1em;
+      box-sizing: border-box;
     }
-
-    button[type="submit"] {
-      margin-top: 1.5em;
-      width: 100%;
-      background: #ff4d6d;
+    button {
+      background-color: #ff6b81;
       color: white;
       border: none;
-      padding: 0.8em;
-      font-size: 1.1em;
-      border-radius: 12px;
       cursor: pointer;
-      font-weight: bold;
     }
-
-    button[type="submit"]:hover {
-      background: #e43f5a;
+    button:hover {
+      background-color: #ff4757;
     }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Nouvelle activité 💡</h1>
-    <a href="index.html" class="back-button">⬅ Retour</a>
-  </header>
+  <h1>Ajouter une activité</h1>
+  <form id="activityForm">
+    <input type="text" id="title" placeholder="Titre (obligatoire)" required />
+    <textarea id="description" placeholder="Description (optionnel)"></textarea>
+    <input type="text" id="location" placeholder="Lieu (optionnel)" />
+    <input type="date" id="date" />
+    <input type="file" id="photo" accept="image/*" />
+    <button type="submit">Ajouter</button>
+  </form>
 
-  <main>
-    <form id="activity-form">
-      <label>Titre *</label>
-      <input type="text" name="title" required />
+  <!-- Firebase CDN (compat) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-storage-compat.js"></script>
 
-      <label>Description</label>
-      <textarea name="description"></textarea>
-
-      <label>Lieu</label>
-      <input type="text" name="location" />
-
-      <label>Date</label>
-      <input type="date" name="date" />
-
-      <label>Tags</label>
-      <input type="text" name="tags" />
-
-      <label>Photo</label>
-      <input type="file" name="photo" accept="image/*" />
-
-      <button type="submit">Ajouter cette activité ✨</button>
-    </form>
-  </main>
-
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
-
+  <script>
     const firebaseConfig = {
       apiKey: "AIzaSyCZ7zsXf4yWALo7byJMCVNo_ySszFObeeY",
       authDomain: "todolove-989f9.firebaseapp.com",
@@ -125,46 +67,49 @@
       measurementId: "G-JBXFDQWTG4"
     };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const storage = getStorage(app);
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const storage = firebase.storage();
 
-    document.getElementById("activity-form").addEventListener("submit", async (e) => {
+    const form = document.getElementById('activityForm');
+
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      try {
-        const form = e.target;
-        const title = form.title.value.trim();
-        const description = form.description.value.trim();
-        const location = form.location.value.trim();
-        const date = form.date.value;
-        const tags = form.tags.value.trim();
-        const photoFile = form.photo.files[0];
+      const title = document.getElementById('title').value.trim();
+      const description = document.getElementById('description').value.trim();
+      const location = document.getElementById('location').value.trim();
+      const date = document.getElementById('date').value;
+      const photoFile = document.getElementById('photo').files[0];
 
+      if (!title) {
+        alert("Le titre est obligatoire.");
+        return;
+      }
+
+      try {
         let photoURL = "";
 
         if (photoFile) {
-          const storageRef = ref(storage, 'activities/' + Date.now() + '_' + photoFile.name);
-          const snapshot = await uploadBytes(storageRef, photoFile);
-          photoURL = await getDownloadURL(snapshot.ref);
-          console.log("✅ Image uploadée avec succès :", photoURL);
+          const storageRef = storage.ref().child('photos/' + Date.now() + "_" + photoFile.name);
+          await storageRef.put(photoFile);
+          photoURL = await storageRef.getDownloadURL();
         }
 
-        const docRef = await addDoc(collection(db, "activities"), {
+        await db.collection('activities').add({
           title,
           description,
           location,
           date,
-          tags,
-          photo: photoURL
+          photoURL,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
 
-        console.log("✅ Activité ajoutée avec succès :", docRef.id);
-        window.location.href = "index.html";
-
+        alert("Activité ajoutée avec succès !");
+        form.reset();
       } catch (error) {
-        console.error("❌ Erreur pendant l'ajout :", error);
-        alert("Erreur : " + error.message);
+        console.error("Erreur lors de l'ajout :", error);
+        alert("Une erreur est survenue.");
       }
     });
   </script>
