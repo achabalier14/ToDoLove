@@ -2,21 +2,29 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Ajouter une activité</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #ffe4ec;
-      margin: 0;
+      background: linear-gradient(to bottom right, #ffe4ec, #ffffff);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       padding: 0;
+      margin: 0;
     }
+
     header {
       background-color: #ff8fa3;
       padding: 1em;
-      color: white;
       text-align: center;
+      color: white;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
+
+    h1 {
+      margin: 0;
+      font-size: 1.8em;
+    }
+
     .back-button {
       display: inline-block;
       margin-top: 0.5em;
@@ -24,70 +32,81 @@
       padding: 0.5em 1em;
       color: white;
       text-decoration: none;
-      border-radius: 8px;
+      border-radius: 12px;
+      font-weight: bold;
     }
+
     main {
       max-width: 500px;
       margin: 2em auto;
       background: white;
       padding: 2em;
       border-radius: 16px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
+
     form label {
-      display: block;
+      font-weight: 600;
       margin-top: 1em;
+      display: block;
+      color: #333;
     }
-    form input, form textarea {
+
+    form input,
+    form textarea {
       width: 100%;
       padding: 0.8em;
       margin-top: 0.3em;
       border: 1px solid #ccc;
-      border-radius: 8px;
+      border-radius: 10px;
+      font-size: 1em;
     }
-    button {
+
+    button[type="submit"] {
       margin-top: 1.5em;
       width: 100%;
-      padding: 0.8em;
-      background-color: #ff4d6d;
+      background: #ff4d6d;
       color: white;
       border: none;
-      border-radius: 8px;
-      font-size: 1em;
+      padding: 0.8em;
+      font-size: 1.1em;
+      border-radius: 12px;
       cursor: pointer;
+      font-weight: bold;
     }
-    button:hover {
-      background-color: #e63950;
+
+    button[type="submit"]:hover {
+      background: #e43f5a;
     }
   </style>
 </head>
 <body>
   <header>
-    <h1>Ajouter une activité ✨</h1>
+    <h1>Nouvelle activité 💡</h1>
     <a href="index.html" class="back-button">⬅ Retour</a>
   </header>
 
   <main>
     <form id="activity-form">
-      <label for="title">Titre *</label>
-      <input type="text" id="title" name="title" required />
+      <label>Titre *</label>
+      <input type="text" name="title" required />
 
-      <label for="description">Description</label>
-      <textarea id="description" name="description"></textarea>
+      <label>Description</label>
+      <textarea name="description"></textarea>
 
-      <label for="location">Lieu</label>
-      <input type="text" id="location" name="location" />
+      <label>Lieu</label>
+      <input type="text" name="location" />
 
-      <label for="date">Date</label>
-      <input type="date" id="date" name="date" />
+      <label>Date</label>
+      <input type="date" name="date" />
 
-      <label for="tags">Tags</label>
-      <input type="text" id="tags" name="tags" />
+      <label>Tags</label>
+      <input type="text" name="tags" />
 
-      <label for="photo">Photo</label>
-      <input type="file" id="photo" name="photo" accept="image/*" />
+      <label>Photo</label>
+      <input type="file" name="photo" accept="image/*" />
 
-      <button type="submit">Ajouter cette activité</button>
+      <button type="submit">Ajouter cette activité ✨</button>
     </form>
   </main>
 
@@ -100,7 +119,7 @@
       apiKey: "AIzaSyCZ7zsXf4yWALo7byJMCVNo_ySszFObeeY",
       authDomain: "todolove-989f9.firebaseapp.com",
       projectId: "todolove-989f9",
-      storageBucket: "todolove-989f9.appspot.com", // correction ici
+      storageBucket: "todolove-989f9.appspot.com",
       messagingSenderId: "851030512825",
       appId: "1:851030512825:web:5b7a2ba992b363a7ab3768",
       measurementId: "G-JBXFDQWTG4"
@@ -110,50 +129,42 @@
     const db = getFirestore(app);
     const storage = getStorage(app);
 
-    const form = document.getElementById("activity-form");
-
-    form.addEventListener("submit", async (e) => {
+    document.getElementById("activity-form").addEventListener("submit", async (e) => {
       e.preventDefault();
 
-      const title = form.title.value.trim();
-      const description = form.description.value.trim();
-      const location = form.location.value.trim();
-      const date = form.date.value;
-      const tags = form.tags.value.trim();
-      const photoFile = form.photo.files[0];
-
-      let photoURL = "";
-
       try {
-        console.log("🟡 Envoi en cours...");
+        const form = e.target;
+        const title = form.title.value.trim();
+        const description = form.description.value.trim();
+        const location = form.location.value.trim();
+        const date = form.date.value;
+        const tags = form.tags.value.trim();
+        const photoFile = form.photo.files[0];
 
-        // 1. Si une image est présente, on l’upload d’abord
+        let photoURL = "";
+
         if (photoFile) {
-          const imageRef = ref(storage, `activities/${Date.now()}_${photoFile.name}`);
-          const snapshot = await uploadBytes(imageRef, photoFile);
+          const storageRef = ref(storage, 'activities/' + Date.now() + '_' + photoFile.name);
+          const snapshot = await uploadBytes(storageRef, photoFile);
           photoURL = await getDownloadURL(snapshot.ref);
-          console.log("✅ Image uploadée :", photoURL);
+          console.log("✅ Image uploadée avec succès :", photoURL);
         }
 
-        // 2. Ajout des données dans Firestore
         const docRef = await addDoc(collection(db, "activities"), {
           title,
           description,
           location,
           date,
           tags,
-          photo: photoURL,
-          createdAt: new Date()
+          photo: photoURL
         });
 
-        console.log("✅ Activité ajoutée avec ID :", docRef.id);
-
-        // 3. Redirection
+        console.log("✅ Activité ajoutée avec succès :", docRef.id);
         window.location.href = "index.html";
 
       } catch (error) {
-        console.error("❌ Erreur détectée :", error);
-        alert("Une erreur est survenue : " + error.message);
+        console.error("❌ Erreur pendant l'ajout :", error);
+        alert("Erreur : " + error.message);
       }
     });
   </script>
